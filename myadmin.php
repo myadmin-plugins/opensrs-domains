@@ -15,10 +15,10 @@ return [
 	'version' => '1.0.0',
 	'type' => 'licenses',
 	'hooks' => [
-		'function.requirements' => ['Detain\MyAdminOpensrs\Plugin', 'Requirements'],
+		/*'function.requirements' => ['Detain\MyAdminOpensrs\Plugin', 'Requirements'],
 		'licenses.settings' => ['Detain\MyAdminOpensrs\Plugin', 'Settings'],
 		'licenses.activate' => ['Detain\MyAdminOpensrs\Plugin', 'Activate'],
 		'licenses.change_ip' => ['Detain\MyAdminOpensrs\Plugin', 'ChangeIp'],
-		'ui.menu' => ['Detain\MyAdminOpensrs\Plugin', 'Menu']
+		'ui.menu' => ['Detain\MyAdminOpensrs\Plugin', 'Menu'] */
 	],
 ];
