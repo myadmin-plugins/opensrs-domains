@@ -15,8 +15,8 @@ return [
 	'version' => '1.0.0',
 	'type' => 'service',
 	'hooks' => [
-		/*'function.requirements' => ['Detain\MyAdminOpensrs\Plugin', 'Requirements'],
 		'domains.settings' => ['Detain\MyAdminOpensrs\Plugin', 'Settings'],
+		/*'function.requirements' => ['Detain\MyAdminOpensrs\Plugin', 'Requirements'],
 		'domains.activate' => ['Detain\MyAdminOpensrs\Plugin', 'Activate'],
 		'domains.change_ip' => ['Detain\MyAdminOpensrs\Plugin', 'ChangeIp'],
 		'ui.menu' => ['Detain\MyAdminOpensrs\Plugin', 'Menu'] */
