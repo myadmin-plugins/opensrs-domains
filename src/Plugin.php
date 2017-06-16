@@ -7,7 +7,20 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Plugin {
 
+	public static $name = 'Opensrs Domains';
+	public static $description = 'Allows selling of Opensrs Server and VPS License Types.  More info at https://www.netenberg.com/opensrs.php';
+	public static $help = 'It provides more than one million end users the ability to quickly install dozens of the leading open source content management systems into their web space.  	Must have a pre-existing cPanel license with cPanelDirect to purchase a opensrs license. Allow 10 minutes for activation.';
+	public static $module = 'domains';
+	public static $type = 'service';
+
+
 	public function __construct() {
+	}
+
+	public static function Hooks() {
+		return [
+			'domains.settings' => ['Detain\MyAdminOpensrs\Plugin', 'Settings'],
+		];
 	}
 
 	public static function Activate(GenericEvent $event) {
