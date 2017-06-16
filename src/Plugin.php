@@ -19,7 +19,7 @@ class Plugin {
 
 	public static function Hooks() {
 		return [
-			'domains.settings' => ['Detain\MyAdminOpensrs\Plugin', 'Settings'],
+			'domains.settings' => [__CLASS__, 'Settings'],
 		];
 	}
 
