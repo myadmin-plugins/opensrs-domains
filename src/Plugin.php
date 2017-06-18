@@ -19,7 +19,7 @@ class Plugin {
 
 	public static function getHooks() {
 		return [
-			'domains.settings' => [__CLASS__, 'Settings'],
+			'domains.settings' => [__CLASS__, 'getSettings'],
 		];
 	}
 
@@ -83,7 +83,7 @@ class Plugin {
 		$loader->add_requirement('vps_add_opensrs', '/vps/addons/vps_add_opensrs.php');
 	}
 
-	public static function Settings(GenericEvent $event) {
+	public static function getSettings(GenericEvent $event) {
 		$module = 'domains';
 		$settings = $event->getSubject();
 		$settings->add_text_setting($module, 'API Settings', 'opensrs_username', 'OpenSRS Username:', 'Username to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_USERNAME'));
