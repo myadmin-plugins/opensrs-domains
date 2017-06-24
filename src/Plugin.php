@@ -24,7 +24,6 @@ class Plugin {
 	}
 
 	public static function Activate(GenericEvent $event) {
-		// will be executed when the licenses.license event is dispatched
 		$license = $event->getSubject();
 		if ($event['category'] == SERVICE_TYPES_FANTASTICO) {
 			myadmin_log('licenses', 'info', 'Opensrs Activation', __LINE__, __FILE__);
@@ -35,7 +34,6 @@ class Plugin {
 	}
 
 	public static function getMenu(GenericEvent $event) {
-		// will be executed when the licenses.settings event is dispatched
 		$menu = $event->getSubject();
 		$module = 'licenses';
 		if ($GLOBALS['tf']->ima == 'admin') {
@@ -46,7 +44,6 @@ class Plugin {
 	}
 
 	public static function getRequirements(GenericEvent $event) {
-		// will be executed when the licenses.loader event is dispatched
 		$loader = $event->getSubject();
 		$loader->add_requirement('crud_opensrs_list', '/../vendor/detain/crud/src/crud/crud_opensrs_list.php');
 		$loader->add_requirement('crud_reusable_opensrs', '/../vendor/detain/crud/src/crud/crud_reusable_opensrs.php');
