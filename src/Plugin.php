@@ -26,7 +26,7 @@ class Plugin {
 	public static function getActivate(GenericEvent $event) {
 		$license = $event->getSubject();
 		if ($event['category'] == SERVICE_TYPES_FANTASTICO) {
-			myadmin_log('licenses', 'info', 'Opensrs Activation', __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', 'Opensrs Activation', __LINE__, __FILE__);
 			function_requirements('activate_opensrs');
 			activate_opensrs($license->get_ip(), $event['field1']);
 			$event->stopPropagation();
@@ -35,11 +35,10 @@ class Plugin {
 
 	public static function getMenu(GenericEvent $event) {
 		$menu = $event->getSubject();
-		$module = 'licenses';
 		if ($GLOBALS['tf']->ima == 'admin') {
-			$menu->add_link($module, 'choice=none.reusable_opensrs', 'icons/database_warning_48.png', 'ReUsable Opensrs Licenses');
-			$menu->add_link($module, 'choice=none.opensrs_list', 'icons/database_warning_48.png', 'Opensrs Licenses Breakdown');
-			$menu->add_link($module.'api', 'choice=none.opensrs_licenses_list', 'whm/createacct.gif', 'List all Opensrs Licenses');
+			$menu->add_link(self::$module, 'choice=none.reusable_opensrs', 'icons/database_warning_48.png', 'ReUsable Opensrs Licenses');
+			$menu->add_link(self::$module, 'choice=none.opensrs_list', 'icons/database_warning_48.png', 'Opensrs Licenses Breakdown');
+			$menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', 'whm/createacct.gif', 'List all Opensrs Licenses');
 		}
 	}
 
@@ -60,15 +59,14 @@ class Plugin {
 	}
 
 	public static function getSettings(GenericEvent $event) {
-		$module = 'domains';
 		$settings = $event->getSubject();
-		$settings->add_text_setting($module, 'API Settings', 'opensrs_username', 'OpenSRS Username:', 'Username to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_USERNAME'));
-		$settings->add_text_setting($module, 'API Settings', 'opensrs_password', 'OpenSRS Password:', 'Password to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_PASSWORD'));
-		$settings->add_text_setting($module, 'API Settings', 'opensrs_key', 'OpenSRS API Key:', 'Password to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_KEY'));
-		$settings->add_text_setting($module, 'API Settings', 'opensrs_test_key', 'OpenSRS Test API Key:', 'Password to use for OpenSRS Test API Authentication', $settings->get_setting('OPENSRS_TEST_KEY'));
-		$settings->add_text_setting($module, 'Price Adjustments', 'opensrs_profit', 'Default Amount to add to our cost for domain registrations to pass onto the client:', 'For example, if it costs us $6 to register a .site domain and this is set to 3, it would cost a client $9', $settings->get_setting('OPENSRS_PROFIT'));
-		$settings->add_text_setting($module, 'Price Adjustments', 'opensrs_privacy_cost', 'How much to charge for Whois Privacy on a domain', 'OpenSRS Charges for this so make sure you at least charge what they charge!', $settings->get_setting('OPENSRS_PRIVACY_COST'));
-		$settings->add_dropdown_setting($module, 'Out of Stock', 'outofstock_opensrs_domains', 'Out Of Stock OpenSRS Domains', 'Enable/Disable Sales Of This Type', OUTOFSTOCK_OPENSRS_DOMAINS, array('0', '1'), array('No', 'Yes', ));
+		$settings->add_text_setting(self::$module, 'API Settings', 'opensrs_username', 'OpenSRS Username:', 'Username to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_USERNAME'));
+		$settings->add_text_setting(self::$module, 'API Settings', 'opensrs_password', 'OpenSRS Password:', 'Password to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_PASSWORD'));
+		$settings->add_text_setting(self::$module, 'API Settings', 'opensrs_key', 'OpenSRS API Key:', 'Password to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_KEY'));
+		$settings->add_text_setting(self::$module, 'API Settings', 'opensrs_test_key', 'OpenSRS Test API Key:', 'Password to use for OpenSRS Test API Authentication', $settings->get_setting('OPENSRS_TEST_KEY'));
+		$settings->add_text_setting(self::$module, 'Price Adjustments', 'opensrs_profit', 'Default Amount to add to our cost for domain registrations to pass onto the client:', 'For example, if it costs us $6 to register a .site domain and this is set to 3, it would cost a client $9', $settings->get_setting('OPENSRS_PROFIT'));
+		$settings->add_text_setting(self::$module, 'Price Adjustments', 'opensrs_privacy_cost', 'How much to charge for Whois Privacy on a domain', 'OpenSRS Charges for this so make sure you at least charge what they charge!', $settings->get_setting('OPENSRS_PRIVACY_COST'));
+		$settings->add_dropdown_setting(self::$module, 'Out of Stock', 'outofstock_opensrs_domains', 'Out Of Stock OpenSRS Domains', 'Enable/Disable Sales Of This Type', OUTOFSTOCK_OPENSRS_DOMAINS, array('0', '1'), array('No', 'Yes', ));
 	}
 
 }
