@@ -28,7 +28,7 @@ class Plugin {
 		if ($event['category'] == SERVICE_TYPES_FANTASTICO) {
 			myadmin_log(self::$module, 'info', 'Opensrs Activation', __LINE__, __FILE__);
 			function_requirements('activate_opensrs');
-			activate_opensrs($serviceClass->get_ip(), $event['field1']);
+			activate_opensrs($serviceClass->getIp(), $event['field1']);
 			$event->stopPropagation();
 		}
 	}
