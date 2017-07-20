@@ -5,6 +5,11 @@ namespace Detain\MyAdminOpensrs;
 use Detain\Opensrs\Opensrs;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
+/**
+ * Class Plugin
+ *
+ * @package Detain\MyAdminOpensrs
+ */
 class Plugin {
 
 	public static $name = 'Opensrs Domains';
@@ -13,16 +18,24 @@ class Plugin {
 	public static $module = 'domains';
 	public static $type = 'service';
 
-
+	/**
+	 * Plugin constructor.
+	 */
 	public function __construct() {
 	}
 
+	/**
+	 * @return array
+	 */
 	public static function getHooks() {
 		return [
 			'domains.settings' => [__CLASS__, 'getSettings'],
 		];
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getActivate(GenericEvent $event) {
 		$serviceClass = $event->getSubject();
 		if ($event['category'] == get_service_define('FANTASTICO')) {
@@ -33,6 +46,9 @@ class Plugin {
 		}
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getMenu(GenericEvent $event) {
 		$menu = $event->getSubject();
 		if ($GLOBALS['tf']->ima == 'admin') {
@@ -42,6 +58,9 @@ class Plugin {
 		}
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
 		$loader->add_requirement('crud_opensrs_list', '/../vendor/detain/crud/src/crud/crud_opensrs_list.php');
@@ -58,6 +77,9 @@ class Plugin {
 		$loader->add_requirement('vps_add_opensrs', '/vps/addons/vps_add_opensrs.php');
 	}
 
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
 	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
 		$settings->add_text_setting(self::$module, 'API Settings', 'opensrs_username', 'OpenSRS Username:', 'Username to use for OpenSRS API Authentication', $settings->get_setting('OPENSRS_USERNAME'));
