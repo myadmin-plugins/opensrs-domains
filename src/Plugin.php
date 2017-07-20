@@ -30,8 +30,52 @@ class Plugin {
 	public static function getHooks() {
 		return [
 			'function.requirements' => [__CLASS__, 'getRequirements'],
+			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
 			self::$module.'.settings' => [__CLASS__, 'getSettings']
 		];
+	}
+
+	/**
+	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+	 */
+	public static function getAddon(GenericEvent $event) {
+		$service = $event->getSubject();
+		function_requirements('class.Addon');
+		$addon = new \Addon();
+		$addon->setModule(self::$module)
+			->set_text('Whois Privacy')
+			->set_cost(OPENSRS_PRIVACY_COST)
+			->set_enable([__CLASS__, 'doEnable'])
+			->set_disable([__CLASS__, 'doDisable'])
+			->register();
+		$service->addAddon($addon);
+	}
+
+	/**
+	 * @param \Service_Order $serviceOrder
+	 * @param                $repeatInvoiceId
+	 * @param bool           $regexMatch
+	 * @throws \Exception
+	 */
+	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+		$serviceInfo = $serviceOrder->getServiceInfo();
+		$settings = get_module_settings(self::$module);
+		myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__);
+		function_requirements('class.OpenSRS');
+		OpenSRS::whois_privacy($serviceInfo[$settings['PREFIX'].'_hostname'], TRUE);
+	}
+
+	/**
+	 * @param \Service_Order $serviceOrder
+	 * @param                $repeatInvoiceId
+	 * @param bool           $regexMatch
+	 * @throws \Exception
+	 */
+	public static function doDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+		$serviceInfo = $serviceOrder->getServiceInfo();
+		$settings = get_module_settings(self::$module);
+		function_requirements('class.OpenSRS');
+		OpenSRS::whois_privacy($serviceInfo[$settings['PREFIX'].'_hostname'], FALSE);
 	}
 
 	/**
