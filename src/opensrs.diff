@@ -1,0 +1,132 @@
+diff --git a/opensrs/domains/provisioning/provSWregister.php b/opensrs/domains/provisioning/provSWregister.php
+index 781ca32..5989a0c 100644
+--- a/opensrs/domains/provisioning/provSWregister.php
++++ b/opensrs/domains/provisioning/provSWregister.php
+@@ -36,7 +36,7 @@ class provSWregister extends openSRS_base {
+ 			$allPassed = $this->_allTimeRequired ();
+ 
+ 			// The following TLDs require additional option values
+-			$special_tlds = array("ca", "asia", "be", "de", "eu", "it", "name", "us", "au", "pro", "br");
++			$special_tlds = array("ca", "asia", "be", "de", "eu", "it", "name", "us", "au", "pro", "br", "nu", "se");
+ 
+ 			if (in_array($tld, $special_tlds)) {
+ 				$_ccTLD = "_ccTLD_" . $tld;
+@@ -229,6 +229,54 @@ class provSWregister extends openSRS_base {
+ 		return $subtest;
+ 	}
+ 
++	private function _ccTLD_nu () {
++		$subtest = true;
++		$reqDatas = array("registrant_type");
++		foreach($reqDatas as $reqData) {
++			if ($this->_dataObject->registrant_extra_info->$reqData == "") {
++				trigger_error ("oSRS Error - ". $reqData ." is not defined.", E_USER_WARNING);
++				$subtest = false;
++			}
++			else
++			{
++				if ($reqData == "registrant_type" && $this->_dataObject->registrant_extra_info->$reqData == 'individual')
++				{
++					$reqDatas[] = 'id_card_number';
++				}
++				else
++				{
++					$reqDatas[] = 'registrant_vat_id';
++					$reqDatas[] = 'registration_number';
++				}
++			}
++		}
++		return $subtest;
++	}
++
++	private function _ccTLD_se () {
++		$subtest = true;
++		$reqDatas = array("registrant_type");
++		foreach($reqDatas as $reqData) {
++			if ($this->_dataObject->registrant_extra_info->$reqData == "") {
++				trigger_error ("oSRS Error - ". $reqData ." is not defined.", E_USER_WARNING);
++				$subtest = false;
++			}
++			else
++			{
++				if ($reqData == "registrant_type" && $this->_dataObject->registrant_extra_info->$reqData == 'individual')
++				{
++					$reqDatas[] = 'id_card_number';
++				}
++				else
++				{
++					$reqDatas[] = 'registrant_vat_id';
++					$reqDatas[] = 'registration_number';
++				}
++			}
++		}
++		return $subtest;
++	}
++
+ 	// Post validation functions
+ 	private function _processRequest ($ccTLD){
+ 		// Compile the command
+@@ -364,15 +412,39 @@ class provSWregister extends openSRS_base {
+ 			$cmd['attributes']['owner_confirm_address'] = $this->_dataObject->data->owner_confirm_address;
+ 		}
+ 
+-		if ($ccTLD == "name") {
++/*		if ($ccTLD == "name") {
+ 			$cmd['attributes']['tld_data']['forwarding_email'] = $this->_dataObject->data->forwarding_email;
+-		}
++		}*/
+ 
+ 		if ($ccTLD == "us") {
+ 			$cmd['attributes']['tld_data']['nexus']['app_purpose'] = $this->_dataObject->nexus->app_purpose;
+ 			$cmd['attributes']['tld_data']['nexus']['category'] = $this->_dataObject->nexus->category;
+ 			if (isSet($this->_dataObject->nexus->validator) && $this->_dataObject->nexus->validator != "") $cmd['attributes']['tld_data']['nexus']['validator'] = $this->_dataObject->nexus->validator;
+ 		}
++		if ($ccTLD == "nu") {
++			$cmd['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = $this->_dataObject->registrant_extra_info->registrant_type;
++			if ($this->_dataObject->registrant_extra_info->registrant_type == 'individual')
++			{
++				$cmd['attributes']['tld_data']['registrant_extra_info']['id_card_number'] = $this->_dataObject->registrant_extra_info->id_card_number;
++			}
++			else
++			{
++				$cmd['attributes']['tld_data']['registrant_extra_info']['registrant_vat_id'] = $this->_dataObject->registrant_extra_info->registrant_vat_id;
++				$cmd['attributes']['tld_data']['registrant_extra_info']['registration_number'] = $this->_dataObject->registrant_extra_info->registration_number;
++			}
++		}
++		if ($ccTLD == "se") {
++			$cmd['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = $this->_dataObject->registrant_extra_info->registrant_type;
++			if ($this->_dataObject->registrant_extra_info->registrant_type == 'individual')
++			{
++				$cmd['attributes']['tld_data']['registrant_extra_info']['id_card_number'] = $this->_dataObject->registrant_extra_info->id_card_number;
++			}
++			else
++			{
++				$cmd['attributes']['tld_data']['registrant_extra_info']['registrant_vat_id'] = $this->_dataObject->registrant_extra_info->registrant_vat_id;
++				$cmd['attributes']['tld_data']['registrant_extra_info']['registration_number'] = $this->_dataObject->registrant_extra_info->registration_number;
++			}
++		}
+ 
+ 		if ($ccTLD == "pro") {
+ 			$reqDatasPRO = array("authority", "authority_website", "license_number", "profession");
+diff --git a/opensrs/openSRS_loader.php b/opensrs/openSRS_loader.php
+index 2086864..de2aedd 100644
+--- a/opensrs/openSRS_loader.php
++++ b/opensrs/openSRS_loader.php
+@@ -18,12 +18,13 @@ final class Autoloader
+   static public function load_domains( $classname )
+   {
+     $iterator = new DirectoryIterator(OPENSRSDOMAINS);
+-    foreach($iterator as $dir){
+-    	if($dir->isDot()) continue;
+-      $classfile = OPENSRSDOMAINS . DS . $dir . DS . $classname . ".php";
+-    	if(file_exists( $classfile )) {
++	while($iterator->valid()) {
++		$file = $iterator->current();
++		$classfile = OPENSRSDOMAINS . DS . $file->getFilename() . DS . $classname . ".php";
++		if(!$iterator->isDot() && file_exists( $classfile )) {
+       	require_once $classfile;
+     	}
++		$iterator->next();
+     }
+   }
+ }
