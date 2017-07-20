@@ -40,7 +40,7 @@ define('OPENSRSFASTLOOKUP', OPENSRSURI . DS.'fastlookup');
 
 
 if (!defined('OPENSRS_USERNAME'))
-	require_once __DIR__ . '/../config/config.settings.php';
+	require_once __DIR__ . '/../../../../include/config/config.settings.php';
 
 /**
 * OpenSRS reseller username
