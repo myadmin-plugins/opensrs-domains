@@ -2,7 +2,6 @@
 
 namespace Detain\MyAdminOpenSRS;
 
-use Detain\MyAdminOpenSRS\OpenSRS;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Detain\MyAdminOpenSRS\OpenSRS;
 
