@@ -29,7 +29,7 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			//'function.requirements' => [__CLASS__, 'getRequirements'],
+			'function.requirements' => [__CLASS__, 'getRequirements'],
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
 			self::$module.'.settings' => [__CLASS__, 'getSettings']
 		];
@@ -108,7 +108,7 @@ class Plugin {
 	 */
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
-		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php');
+		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
 	}
 
 	/**
