@@ -7,6 +7,8 @@
  * @package MyAdmin
  * @category Domains
  */
+namespace Detain\MyAdminOpenSRS;
+
 require_once __DIR__.'/openSRS_loader.php';
 use opensrs\Request;
 
