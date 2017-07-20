@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../../vendor/autoload.php';
+require_once __DIR__.'/../../../autoload.php';
 defined('OPENSRSURI') or require_once __DIR__.'/openSRS_config.php';
 
 use opensrs\Request;

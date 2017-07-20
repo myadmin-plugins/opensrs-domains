@@ -1,20 +1,20 @@
 <?php
 
-namespace Detain\MyAdminOpensrs;
+namespace Detain\MyAdminOpenSRS;
 
-use Detain\Opensrs\Opensrs;
+//use Detain\MyAdminOpenSRS\OpenSRS;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * Class Plugin
  *
- * @package Detain\MyAdminOpensrs
+ * @package Detain\MyAdminOpenSRS
  */
 class Plugin {
 
-	public static $name = 'Opensrs Domains';
-	public static $description = 'Allows selling of Opensrs Server and VPS License Types.  More info at https://www.netenberg.com/opensrs.php';
-	public static $help = 'It provides more than one million end users the ability to quickly install dozens of the leading open source content management systems into their web space.  	Must have a pre-existing cPanel license with cPanelDirect to purchase a opensrs license. Allow 10 minutes for activation.';
+	public static $name = 'OpenSRS Domains';
+	public static $description = 'Allows selling of OpenSRS Server and VPS License Types.  More info at https://www.netenberg.com/opensrs.php';
+	public static $help = 'It provides more than one million end users the ability to quickly install dozens of the leading open source content management systems into their web space.  	Must have a pre-existing cPanel license with cPanelDirect to purchase a OpenSRS license. Allow 10 minutes for activation.';
 	public static $module = 'domains';
 	public static $type = 'service';
 
@@ -29,7 +29,8 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			'domains.settings' => [__CLASS__, 'getSettings']
+			'function.requirements' => [__CLASS__, 'getRequirements'],
+			self::$module.'.settings' => [__CLASS__, 'getSettings']
 		];
 	}
 
@@ -39,7 +40,7 @@ class Plugin {
 	public static function getActivate(GenericEvent $event) {
 		$serviceClass = $event->getSubject();
 		if ($event['category'] == get_service_define('FANTASTICO')) {
-			myadmin_log(self::$module, 'info', 'Opensrs Activation', __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__);
 			function_requirements('activate_opensrs');
 			activate_opensrs($serviceClass->getIp(), $event['field1']);
 			$event->stopPropagation();
@@ -52,9 +53,9 @@ class Plugin {
 	public static function getMenu(GenericEvent $event) {
 		$menu = $event->getSubject();
 		if ($GLOBALS['tf']->ima == 'admin') {
-			$menu->add_link(self::$module, 'choice=none.reusable_opensrs', 'icons/database_warning_48.png', 'ReUsable Opensrs Licenses');
-			$menu->add_link(self::$module, 'choice=none.opensrs_list', 'icons/database_warning_48.png', 'Opensrs Licenses Breakdown');
-			$menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', 'whm/createacct.gif', 'List all Opensrs Licenses');
+			$menu->add_link(self::$module, 'choice=none.reusable_opensrs', 'icons/database_warning_48.png', 'ReUsable OpenSRS Licenses');
+			$menu->add_link(self::$module, 'choice=none.opensrs_list', 'icons/database_warning_48.png', 'OpenSRS Licenses Breakdown');
+			$menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', 'whm/createacct.gif', 'List all OpenSRS Licenses');
 		}
 	}
 
@@ -63,18 +64,7 @@ class Plugin {
 	 */
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
-		$loader->add_requirement('crud_opensrs_list', '/../vendor/detain/crud/src/crud/crud_opensrs_list.php');
-		$loader->add_requirement('crud_reusable_opensrs', '/../vendor/detain/crud/src/crud/crud_reusable_opensrs.php');
-		$loader->add_requirement('get_opensrs_licenses', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs.inc.php');
-		$loader->add_requirement('get_opensrs_list', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs.inc.php');
-		$loader->add_requirement('opensrs_licenses_list', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs_licenses_list.php');
-		$loader->add_requirement('opensrs_list', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs_list.php');
-		$loader->add_requirement('get_available_opensrs', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs.inc.php');
-		$loader->add_requirement('activate_opensrs', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs.inc.php');
-		$loader->add_requirement('get_reusable_opensrs', '/../vendor/detain/myadmin-opensrs-domains/src/opensrs.inc.php');
-		$loader->add_requirement('reusable_opensrs', '/../vendor/detain/myadmin-opensrs-domains/src/reusable_opensrs.php');
-		$loader->add_requirement('class.Opensrs', '/../vendor/detain/opensrs-domains/src/Opensrs.php');
-		$loader->add_requirement('vps_add_opensrs', '/vps/addons/vps_add_opensrs.php');
+		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php');
 	}
 
 	/**
