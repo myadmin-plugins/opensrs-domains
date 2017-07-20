@@ -2,7 +2,6 @@
 
 namespace Detain\MyAdminOpenSRS;
 
-//use Detain\MyAdminOpenSRS\OpenSRS;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Detain\MyAdminOpenSRS\OpenSRS;
 
@@ -30,7 +29,7 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			'function.requirements' => [__CLASS__, 'getRequirements'],
+			//'function.requirements' => [__CLASS__, 'getRequirements'],
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
 			self::$module.'.settings' => [__CLASS__, 'getSettings']
 		];
