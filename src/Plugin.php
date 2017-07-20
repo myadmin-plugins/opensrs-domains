@@ -29,7 +29,7 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			'domains.settings' => [__CLASS__, 'getSettings'],
+			'domains.settings' => [__CLASS__, 'getSettings']
 		];
 	}
 
