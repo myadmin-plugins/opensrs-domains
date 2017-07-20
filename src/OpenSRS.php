@@ -775,4 +775,71 @@ class OpenSRS
 		return $domains;
 	}
 
+	/**
+	 * Removes the domain at registry level
+	 *
+	 * @param string $domain the domain name or part to search for
+	 * @return array returns true if domain cancelled else false
+	 */
+	public static function redeem_domain($domain) {
+		$username = OPENSRS_USERNAME;
+		$private_key = OPENSRS_KEY;
+		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
+				<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+				<OPS_envelope>
+					<header>
+						<version>0.9</version>
+					</header>
+					<body>
+						<data_block>
+							<dt_assoc>
+								<item key="protocol">XCP</item>
+								<item key="action">REDEEM</item>
+								<item key="object">DOMAIN</item>
+								<item key="attributes">
+									<dt_assoc>
+										<item key="domain">'.$domain.'</item>
+									</dt_assoc>
+								</item>
+							</dt_assoc>
+						</data_block>
+					</body>
+				</OPS_envelope>
+			';
+		$signature = md5(md5($xml.$private_key).$private_key);
+		$prefix = 'ssl://';
+		$host = 'rr-n1-tor.opensrs.net';
+		$port = 55443;
+		$url = '/';
+		$header = '';
+		$header .= "POST $url HTTP/1.0\r\n";
+		$header .= "Content-Type: text/xml\r\n";
+		$header .= 'X-Username: ' . $username . "\r\n";
+		$header .= 'X-Signature: ' . $signature . "\r\n";
+		$header .= 'Content-Length: ' . mb_strlen($xml) . "\r\n\r\n";
+		// ssl:// requires OpenSSL to be installed
+		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
+		if (!$fp) {
+			$result2= 'UnKnown Error';
+			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned error on fsockopen", __LINE__, __FILE__);
+		} else {
+			// post the data to the server
+			fputs($fp, $header . $xml);
+			$i = 0;
+			$xmlresponseobj = null;
+			while (!feof($fp)) {
+				$res = fgets($fp);
+				if($i >=6 ) {
+					$xmlresponseobj .= $res;
+				}
+				$i++;
+			}
+			fclose($fp);
+			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
+			$array1 = json_decode(json_encode($obj1), true); // Convert to array
+			$result_array = $array1['body']['data_block']['dt_assoc'];
+			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned {$result_array}", __LINE__, __FILE__);
+			return $result_array;
+		}
+	}
 }
