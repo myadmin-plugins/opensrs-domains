@@ -31,6 +31,7 @@ class Plugin {
 		return [
 			'function.requirements' => [__CLASS__, 'getRequirements'],
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
+			self::$module.'.activate' => [__CLASS__, 'getActivate'],
 			self::$module.'.settings' => [__CLASS__, 'getSettings']
 		];
 	}
@@ -45,8 +46,8 @@ class Plugin {
 		$addon->setModule(self::$module)
 			->set_text('Whois Privacy')
 			->set_cost(OPENSRS_PRIVACY_COST)
-			->set_enable([__CLASS__, 'doEnable'])
-			->set_disable([__CLASS__, 'doDisable'])
+			->set_enable([__CLASS__, 'doAddonEnable'])
+			->set_disable([__CLASS__, 'doAddonDisable'])
 			->register();
 		$service->addAddon($addon);
 	}
@@ -57,7 +58,7 @@ class Plugin {
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__);
@@ -71,7 +72,7 @@ class Plugin {
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		function_requirements('class.OpenSRS');
@@ -83,10 +84,11 @@ class Plugin {
 	 */
 	public static function getActivate(GenericEvent $event) {
 		$serviceClass = $event->getSubject();
-		if ($event['category'] == get_service_define('FANTASTICO')) {
+		if ($event['category'] == get_service_define('OPENSRS')) {
 			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__);
 			function_requirements('activate_opensrs');
-			activate_opensrs($serviceClass->getIp(), $event['field1']);
+			$return = activate_domain($serviceClass->getId());
+			$event['success'] = $return;
 			$event->stopPropagation();
 		}
 	}
