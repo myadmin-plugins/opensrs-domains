@@ -29,10 +29,10 @@ class Plugin {
 	 */
 	public static function getHooks() {
 		return [
-			'function.requirements' => [__CLASS__, 'getRequirements'],
 			self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
 			self::$module.'.activate' => [__CLASS__, 'getActivate'],
-			self::$module.'.settings' => [__CLASS__, 'getSettings']
+			self::$module.'.settings' => [__CLASS__, 'getSettings'],
+			'function.requirements' => [__CLASS__, 'getRequirements']
 		];
 	}
 
@@ -86,7 +86,7 @@ class Plugin {
 		$serviceClass = $event->getSubject();
 		if ($event['category'] == get_service_define('OPENSRS')) {
 			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__);
-			function_requirements('activate_opensrs');
+			function_requirements('activate_domain');
 			$return = activate_domain($serviceClass->getId());
 			$event['success'] = $return;
 			$event->stopPropagation();
