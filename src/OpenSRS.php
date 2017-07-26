@@ -19,13 +19,13 @@ use opensrs\Request;
 class OpenSRS {
 	public $id;
 	public $cookie;
-	public $osrsHandler_all_info;
-	public $osrsHandler_whois_privacy;
-	public $osrsHandler_status;
+	public $osrsHandlerAllInfo;
+	public $osrsHandlerWhoisPrivacy;
+	public $osrsHandlerStatus;
 	public $locked;
-	public $registrar_status;
-	public $whois_privacy;
-	public $expiry_date;
+	public $registrarStatus;
+	public $whoisPrivacy;
+	public $expiryDate;
 	public $module = 'domains';
 	public $settings;
 	public $serviceInfo;
@@ -58,7 +58,7 @@ class OpenSRS {
 	}
 
 	/**
-	 * Loads all the domain information into the 2 globals and sets the locked, whois_privacy, expiry_date, and registrar_status globals based on the output.
+	 * Loads all the domain information into the 2 globals and sets the locked, whois_privacy, expiry_date, and registrarStatus globals based on the output.
 	 * @return void
 	 */
 	public function load_domain_info() {
@@ -80,7 +80,7 @@ class OpenSRS {
 		);
 		try {
 			$request = new Request();
-			$this->osrsHandler_all_info = $request->process('json', $callstring);
+			$this->osrsHandlerAllInfo = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		} catch (\opensrs\Exception $e) {
@@ -104,13 +104,13 @@ class OpenSRS {
 		);
 		try {
 			$request = new Request();
-			$this->osrsHandler_whois_privacy = $request->process('json', $callstring);
+			$this->osrsHandlerWhoisPrivacy = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		}
-		$this->whois_privacy = $this->osrsHandler_whois_privacy->resultFullRaw['attributes']['state'];
+		$this->whoisPrivacy = $this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']['state'];
 		$callstring = json_encode(
 			[
 			'func' => 'lookupGetDomain',
@@ -129,15 +129,15 @@ class OpenSRS {
 		);
 		try {
 			$request = new Request();
-			$this->osrsHandler_status = $request->process('json', $callstring);
+			$this->osrsHandlerStatus = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		}
-		$this->locked = $this->osrsHandler_status->resultFullRaw['attributes']['lock_state'];
-		$this->registrar_status = $this->osrsHandler_all_info->resultFullRaw['attributes']['sponsoring_rsp'];
-		$this->expiry_date = $this->osrsHandler_all_info->resultFullRaw['attributes']['expiredate'];
+		$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
+		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
+		$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
 	}
 
 	/**
@@ -211,15 +211,15 @@ class OpenSRS {
 	 * @param string $cookie the cookie from opensrs_get_cookie() or domain name
 	 * @param string $hostname hostname of the nameserver to add
 	 * @param string $ip ip address of the nameserver to add
-	 * @param bool $use_domain
+	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function create_nameserver_raw($cookie, $hostname, $ip, $use_domain = FALSE) {
+	public static function create_nameserver_raw($cookie, $hostname, $ip, $useDomain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsCreate',
 			'attributes' => [
-				$use_domain === FALSE ? 'cookie' : 'domain' => $cookie,
+				$useDomain === FALSE ? 'cookie' : 'domain' => $cookie,
 				'name'                                      => $hostname,
 				'ipaddress'                                 => $ip
 			]
@@ -251,15 +251,15 @@ class OpenSRS {
 	 * @param string $cookie the cookie from opensrs_get_cookie()
 	 * @param string $hostname hostname of the nameserver to delete
 	 * @param string $ip ip address of the nameserver to delete
-	 * @param bool $use_domain
+	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function delete_nameserver_raw($cookie, $hostname, $ip, $use_domain = FALSE) {
+	public static function delete_nameserver_raw($cookie, $hostname, $ip, $useDomain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsDelete',
 			'attributes' => [
-				$use_domain === FALSE ? 'cookie' : 'domain' => $cookie,
+				$useDomain === FALSE ? 'cookie' : 'domain' => $cookie,
 				'name'                                      => $hostname,
 				'ipaddress'                                 => $ip
 			]
@@ -305,17 +305,17 @@ class OpenSRS {
 	 *
 	 * @param string $domain the domain name to check transfer status of
 	 * @param int $check_status Flag to request the status of a transfer request. If the transfer state is returned as pending_registry and the Registry shows OpenSRS as the Registrar of record, OpenSRS schedules the completion of gTLD transfers. Allowed values are 0 or 1.
-	 * @param int $get_request_address Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
+	 * @param int $getRequestAddress Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
 	 * @return array an array of result information.
 	 */
-	public static function transfer_check($domain, $check_status = 0, $get_request_address = 0) {
+	public static function transfer_check($domain, $checkStatus = 0, $getRequestAddress = 0) {
 		$callstring = json_encode(
 			[
 			'func' => 'transCheck',
 			'attributes' => [
 				'domain' => $domain,
-				'check_status' => $check_status,
-				'get_request_address' => $get_request_address
+				'check_status' => $checkStatus,
+				'get_request_address' => $getRequestAddress
 			]
 			]
 		);
@@ -689,18 +689,18 @@ class OpenSRS {
 	/**
 	 * gets an array of domains registered by expiry date
 	 *
-	 * @param bool|false|string $start_date start date for lookups, or false(default) for now + 45 days
-	 * @param bool|false|string $end_date   end date for lookups, or false(default) or 12-31 in 20 years
+	 * @param bool|false|string $startDate start date for lookups, or false(default) for now + 45 days
+	 * @param bool|false|string $endDate   end date for lookups, or false(default) or 12-31 in 20 years
 	 * @return array array of domains in the format of domain => expire date
 	 */
-	public static function list_domains_by_expirey_date($start_date = FALSE, $end_date = FALSE) {
+	public static function list_domains_by_expirey_date($startDate = FALSE, $endDate = FALSE) {
 		$module = 'domains';
-		if ($start_date == FALSE)
-			$start_date = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
-		if ($end_date == FALSE)
-			$end_date = date('Y-m-d', strtotime(date('Y').'-12-31 +20 years'));
-		$from_date = date('Y-m-d', strtotime($start_date));
-		$to_date = date('Y-m-d', strtotime($end_date));
+		if ($startDate == FALSE)
+			$startDate = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
+		if ($endDate == FALSE)
+			$endDate = date('Y-m-d', strtotime(date('Y').'-12-31 +20 years'));
+		$from_date = date('Y-m-d', strtotime($startDate));
+		$to_date = date('Y-m-d', strtotime($endDate));
 		$limit = 99999;
 		$page = 0;
 		$end_pages = FALSE;
