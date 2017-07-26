@@ -169,7 +169,7 @@ class OpenSRS {
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
 		if (!isset($osrsHandler->resultFullRaw['attributes'])) {
 			myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		}
 		$cookie = $osrsHandler->resultFullRaw['attributes']['cookie'];
 		return $cookie;
@@ -202,7 +202,7 @@ class OpenSRS {
 		if (isset($osrsHandler2->resultFullRaw['nameserver_list'])) {
 			return $osrsHandler2->resultFullRaw['nameserver_list'];
 		} else {
-			return false;
+			return FALSE;
 		}
 	}
 
@@ -237,10 +237,10 @@ class OpenSRS {
 		}
 		if (isset($osrsHandler2) && isset($osrsHandler2->resultFullRaw) && $osrsHandler2->resultFullRaw['is_success'] == 1) {
 			//			echo $osrsHandler2->resultFullRaw['response_text'].'<br>';
-			return true;
+			return TRUE;
 		} else {
 			//			echo 'ERROR: '.$osrsHandler2->resultFullRaw['response_text'].'<br>';
-			return false;
+			return FALSE;
 
 		}
 		//echo '<pre>'; print_r($osrsHandler2->resultFullRaw); echo '</pre>';
@@ -278,10 +278,10 @@ class OpenSRS {
 		myadmin_log('domains', 'info', 'Delete NS Response'.json_encode($osrsHandler2), __LINE__, __FILE__);
 		if ($osrsHandler2->resultFullRaw['is_success'] == 1) {
 			//			echo $osrsHandler2->resultFullRaw['response_text'].'<br>';
-			return true;
+			return TRUE;
 		} else {
 			//			echo 'ERROR: '.$osrsHandler2->resultFullRaw['response_text'].'<br>';
-			return false;
+			return FALSE;
 
 		}
 		//echo '<pre>'; print_r($osrsHandler2->resultFullRaw); echo '</pre>';
@@ -304,7 +304,7 @@ class OpenSRS {
 	 * minutes.
 	 *
 	 * @param string $domain the domain name to check transfer status of
-	 * @param int $check_status Flag to request the status of a transfer request. If the transfer state is returned as pending_registry and the Registry shows OpenSRS as the Registrar of record, OpenSRS schedules the completion of gTLD transfers. Allowed values are 0 or 1.
+	 * @param int $checkStatus Flag to request the status of a transfer request. If the transfer state is returned as pending_registry and the Registry shows OpenSRS as the Registrar of record, OpenSRS schedules the completion of gTLD transfers. Allowed values are 0 or 1.
 	 * @param int $getRequestAddress Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
 	 * @return array an array of result information.
 	 */
@@ -324,10 +324,10 @@ class OpenSRS {
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		}
 		return $osrsHandler->resultFullRaw;
 	}
@@ -365,10 +365,10 @@ class OpenSRS {
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		}
 		return $osrsHandler->resultFullRaw;
 	}
@@ -402,10 +402,10 @@ class OpenSRS {
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		}
 		return $osrsHandler->resultFullRaw;
 	}
@@ -418,16 +418,16 @@ class OpenSRS {
 	public static function check_domain_available($domain) {
 		$result = OpenSRS::lookup_domain($domain);
 		if (isset($result['attributes']['status']))
-			return ($result['attributes']['status'] == 'available' ? true : false);
+			return ($result['attributes']['status'] == 'available' ? TRUE : FALSE);
 		else
 			$resultValues = array_values($result);
 			foreach ($resultValues as $data)
 				if (isset($data['domain']) && $data['domain'] == $domain)
 					if ($data['status'] == 'available')
-						return true;
+						return TRUE;
 					else
-						return false;
-		return false;
+						return FALSE;
+		return FALSE;
 	}
 
 	/**
@@ -467,7 +467,7 @@ class OpenSRS {
 		foreach ($resultValues as $data)
 			if (isset($data['domain']) && $data['domain'] == $domain)
 				return $data['price'];
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -509,10 +509,10 @@ class OpenSRS {
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		}
 		//request_log('domains', FALSE, __FUNCTION__, 'opensrs', $function, $callstring, $osrsHandler);
 		//echo '<pre>';print_r($tlds);echo '</pre>';exit;
@@ -543,7 +543,7 @@ class OpenSRS {
 											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['transfer'] = bcadd($tldPrices[$tld]['transfer'], $diff, 2);
 									}
 								} else
-									myadmin_log('domains', 'info', "TLD $tld was not set", __LINE__, __FILE__);
+									myadmin_log('domains', 'info', "tld $tld was not set", __LINE__, __FILE__);
 							} else
 								myadmin_log('domains', 'info', "domain {$data['domain']} got blank TLD response {$tld}", __LINE__, __FILE__);
 						}
@@ -595,7 +595,7 @@ class OpenSRS {
 		$port = 55443;
 		$url = '/';
 		$header = '';
-		$header .= "POST $url HTTP/1.0\r\n";
+		$header .= "post $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
 		$header .= 'X-Username: '.$username."\r\n";
 		$header .= 'X-Signature: '.$signature."\r\n";
@@ -604,7 +604,7 @@ class OpenSRS {
 		$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 		if (!$fp) {
 			myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error '.$errno.' '.$errstr, __LINE__, __FILE__);
-			return false;
+			return FALSE;
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -615,10 +615,10 @@ class OpenSRS {
 			fclose($fp);
 			if (!$line[20]) {
 				myadmin_log(self::$module, 'debug', 'OpenSRS Failed - '.$line[17], __LINE__, __FILE__);
-				return false;
+				return FALSE;
 			}
 		}
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -662,7 +662,7 @@ class OpenSRS {
 		$port = 55443;
 		$url = '/';
 		$header = '';
-		$header .= "POST $url HTTP/1.0\r\n";
+		$header .= "post $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
 		$header .= 'X-Username: '.$username."\r\n";
 		$header .= 'X-Signature: '.$signature."\r\n";
@@ -670,7 +670,7 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			return false;
+			return FALSE;
 			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
@@ -687,7 +687,7 @@ class OpenSRS {
 			$result2 = trim(strip_tags($result2));
 			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
 		}
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -739,7 +739,7 @@ class OpenSRS {
 			$port = 55443;
 			$url = '/';
 			$header = '';
-			$header .= "POST $url HTTP/1.0\r\n";
+			$header .= "post $url HTTP/1.0\r\n";
 			$header .= "Content-Type: text/xml\r\n";
 			$header .= 'X-Username: '.OPENSRS_USERNAME."\r\n";
 			$header .= 'X-Signature: '.$signature."\r\n";
@@ -752,7 +752,7 @@ class OpenSRS {
 				// post the data to the server
 				fputs($fp, $header.$xml);
 				$i = 0;
-				$xmlresponseobj = null;
+				$xmlresponseobj = NULL;
 				while (!feof($fp)) {
 					$res = fgets($fp, 1024);
 					if ($i >= 6)
@@ -814,7 +814,7 @@ class OpenSRS {
 		$port = 55443;
 		$url = '/';
 		$header = '';
-		$header .= "POST $url HTTP/1.0\r\n";
+		$header .= "post $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
 		$header .= 'X-Username: '.$username."\r\n";
 		$header .= 'X-Signature: '.$signature."\r\n";
@@ -827,7 +827,7 @@ class OpenSRS {
 			// post the data to the server
 			fputs($fp, $header.$xml);
 			$i = 0;
-			$xmlresponseobj = null;
+			$xmlresponseobj = NULL;
 			while (!feof($fp)) {
 				$res = fgets($fp);
 				if ($i >= 6) {
@@ -837,7 +837,7 @@ class OpenSRS {
 			}
 			fclose($fp);
 			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
-			$array1 = json_decode(json_encode($obj1), true); // Convert to array
+			$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
 			$resultArray = $array1['body']['data_block']['dt_assoc'];
 			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
 			return $resultArray;
