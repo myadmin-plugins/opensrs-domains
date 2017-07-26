@@ -381,7 +381,7 @@ class OpenSRS {
 	 * @param bool|string $selected false to not use this, tld to use just the tld from the domain, or available to use aall availalbe tlds
 	 * @return array an array of result information.
 	 */
-	public static function lookup_domain($domain, $selected = FALSE) {
+	public static function lookupDomain($domain, $selected = FALSE) {
 		//myadmin_log('domains', 'info', "Checking if domain $domain available", __LINE__, __FILE__);
 		// Put the data to the Formatted array
 		$callarray = [
@@ -416,7 +416,7 @@ class OpenSRS {
 	 * @return bool returns true if the domain is available, false otherwise
 	 */
 	public static function check_domain_available($domain) {
-		$result = OpenSRS::lookup_domain($domain);
+		$result = OpenSRS::lookupDomain($domain);
 		if (isset($result['attributes']['status']))
 			return ($result['attributes']['status'] == 'available' ? TRUE : FALSE);
 		else
