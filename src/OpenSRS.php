@@ -40,16 +40,16 @@ class OpenSRS {
 	 * @internal param string $password the API password
 	 * @internal param bool $testing optional (defaults to false) testing
 	 */
-	public function __construct($id = false) {
+	public function __construct($id = FALSE) {
 		$this->settings = get_module_settings($this->module);
-		if ($id != false)
+		if ($id != FALSE)
 			$this->id = (int) $id;
 		elseif (isset($GLOBALS['tf']->variables->request['id']))
 			$this->id = (int) $GLOBALS['tf']->variables->request['id'];
 		else
 			return;
 		$this->serviceInfo = get_service($this->id, $this->module);
-		if ($this->serviceInfo === false)
+		if ($this->serviceInfo === FALSE)
 			return;
 		$this->serviceExtra = run_event('parse_service_extra', $this->serviceInfo[$this->settings['PREFIX'].'_extra'], $this->module);
 		$this->serviceAddons = get_service_addons($this->id, $this->module);
@@ -214,12 +214,12 @@ class OpenSRS {
 	 * @param bool $use_domain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function create_nameserver_raw($cookie, $hostname, $ip, $use_domain = false) {
+	public static function create_nameserver_raw($cookie, $hostname, $ip, $use_domain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsCreate',
 			'attributes' => [
-				$use_domain === false ? 'cookie' : 'domain' => $cookie,
+				$use_domain === FALSE ? 'cookie' : 'domain' => $cookie,
 				'name'                                      => $hostname,
 				'ipaddress'                                 => $ip
 			]
@@ -254,12 +254,12 @@ class OpenSRS {
 	 * @param bool $use_domain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function delete_nameserver_raw($cookie, $hostname, $ip, $use_domain = false) {
+	public static function delete_nameserver_raw($cookie, $hostname, $ip, $use_domain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsDelete',
 			'attributes' => [
-				$use_domain === false ? 'cookie' : 'domain' => $cookie,
+				$use_domain === FALSE ? 'cookie' : 'domain' => $cookie,
 				'name'                                      => $hostname,
 				'ipaddress'                                 => $ip
 			]
@@ -381,7 +381,7 @@ class OpenSRS {
 	 * @param bool|string $selected false to not use this, tld to use just the tld from the domain, or available to use aall availalbe tlds
 	 * @return array an array of result information.
 	 */
-	public static function lookup_domain($domain, $selected = false) {
+	public static function lookup_domain($domain, $selected = FALSE) {
 		//myadmin_log('domains', 'info', "Checking if domain $domain available", __LINE__, __FILE__);
 		// Put the data to the Formatted array
 		$callarray = [
@@ -611,7 +611,7 @@ class OpenSRS {
 			}
 			fclose($fp);
 			if ($line[20])
-					$result2 = true;
+					$result2 = TRUE;
 			else
 				$result2 = $line[17];
 		}
@@ -624,7 +624,7 @@ class OpenSRS {
 	 * @param bool $enabled true if privacy status should be on, false if not
 	 */
 	public static function whois_privacy($domain, $enabled) {
-		if ($enabled == true)
+		if ($enabled == TRUE)
 			$privacyStatusUpdate = 'enable';
 		else
 			$privacyStatusUpdate = 'disable';
@@ -693,19 +693,19 @@ class OpenSRS {
 	 * @param bool|false|string $end_date   end date for lookups, or false(default) or 12-31 in 20 years
 	 * @return array array of domains in the format of domain => expire date
 	 */
-	public static function list_domains_by_expirey_date($start_date = false, $end_date = false) {
+	public static function list_domains_by_expirey_date($start_date = FALSE, $end_date = FALSE) {
 		$module = 'domains';
-		if ($start_date == false)
+		if ($start_date == FALSE)
 			$start_date = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
-		if ($end_date == false)
+		if ($end_date == FALSE)
 			$end_date = date('Y-m-d', strtotime(date('Y').'-12-31 +20 years'));
 		$from_date = date('Y-m-d', strtotime($start_date));
 		$to_date = date('Y-m-d', strtotime($end_date));
 		$limit = 99999;
 		$page = 0;
-		$end_pages = false;
+		$end_pages = FALSE;
 		$domains = [];
-		while ($end_pages == false) {
+		while ($end_pages == FALSE) {
 			$page++;
 			$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\' ?>
 <!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
@@ -745,7 +745,7 @@ class OpenSRS {
 			if (!$fp) {
 				$title = 'Error';
 				$result = 'UnKnown error occurred.';
-				$end_pages = true;
+				$end_pages = TRUE;
 			} else {
 				// post the data to the server
 				fputs($fp, $header.$xml);
@@ -763,13 +763,13 @@ class OpenSRS {
 				$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
 				if (!isset($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
 					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($array1), __LINE__, __FILE__);
-					$end_pages = true;
+					$end_pages = TRUE;
 				} else {
 					$domainArray = $array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
 					foreach ($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'] as $idx => $dom_data)
 						$domains[$dom_data['dt_assoc']['item'][1]] = $dom_data['dt_assoc']['item'][2];
 					if (sizeof($domainArray) < $limit)
-						$end_pages = true;
+						$end_pages = TRUE;
 				}
 			}
 		}
