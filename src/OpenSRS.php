@@ -419,7 +419,9 @@ class OpenSRS {
 	 */
 	public static function checkDomainAvailable($domain) {
 		$result = OpenSRS::lookupDomain($domain);
-		if (isset($result['attributes']['status']))
+		if ($result === FALSE)
+			return FALSE;
+		elseif (isset($result['attributes']['status']))
 			return ($result['attributes']['status'] == 'available' ? TRUE : FALSE);
 		else
 			$resultValues = array_values($result);
