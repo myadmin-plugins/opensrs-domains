@@ -755,7 +755,6 @@ class OpenSRS {
 				$xmlresponseobj = null;
 				while (!feof($fp)) {
 					$res = fgets($fp, 1024);
-					$line[] = $res;
 					if ($i >= 6)
 						$xmlresponseobj .= $res;
 					$i++;
@@ -823,7 +822,6 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			$result2 = 'UnKnown Error';
 			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
