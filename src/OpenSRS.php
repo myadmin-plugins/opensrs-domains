@@ -53,15 +53,15 @@ class OpenSRS {
 			return;
 		$this->serviceExtra = run_event('parse_service_extra', $this->serviceInfo[$this->settings['PREFIX'].'_extra'], $this->module);
 		$this->serviceAddons = get_service_addons($this->id, $this->module);
-		$this->cookie = $this->get_cookie_raw($this->serviceInfo['domain_username'], $this->serviceInfo['domain_password'], $this->serviceInfo['domain_hostname']);
-		$this->load_domain_info();
+		$this->cookie = $this->getCookieRaw($this->serviceInfo['domain_username'], $this->serviceInfo['domain_password'], $this->serviceInfo['domain_hostname']);
+		$this->loadDomainInfo();
 	}
 
 	/**
 	 * Loads all the domain information into the 2 globals and sets the locked, whois_privacy, expiry_date, and registrarStatus globals based on the output.
 	 * @return void
 	 */
-	public function load_domain_info() {
+	public function loadDomainInfo() {
 		$callstring = json_encode(
 			[
 			'func' => 'lookupGetDomain',
@@ -147,7 +147,7 @@ class OpenSRS {
 	 * @param string $domain the domain name
 	 * @return false|string false if there was a problem or the string containing the cookie
 	 */
-	public static function get_cookie_raw($username, $password, $domain) {
+	public static function getCookieRaw($username, $password, $domain) {
 		$callstring = json_encode(
 			[
 			'func' => 'cookieSet',
@@ -180,7 +180,7 @@ class OpenSRS {
 	 * @param string $cookie the cookie from opensrs_get_cookie()
 	 * @return false|array false if error or an array of nameservers
 	 */
-	public static function get_nameservers_raw($cookie) {
+	public static function getNameserversRaw($cookie) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsGet',
@@ -214,7 +214,7 @@ class OpenSRS {
 	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function create_nameserver_raw($cookie, $hostname, $ip, $useDomain = FALSE) {
+	public static function createNameserverRaw($cookie, $hostname, $ip, $useDomain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsCreate',
@@ -254,7 +254,7 @@ class OpenSRS {
 	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function delete_nameserver_raw($cookie, $hostname, $ip, $useDomain = FALSE) {
+	public static function deleteNameserverRaw($cookie, $hostname, $ip, $useDomain = FALSE) {
 		$callstring = json_encode(
 			[
 			'func' => 'nsDelete',
@@ -420,7 +420,8 @@ class OpenSRS {
 		if (isset($result['attributes']['status']))
 			return ($result['attributes']['status'] == 'available' ? true : false);
 		else
-			foreach ($result as $idx => $data)
+			$resultValues = array_values($result);
+			foreach ($resultValues as $data)
 				if (isset($data['domain']) && $data['domain'] == $domain)
 					if ($data['status'] == 'available')
 						return true;
@@ -462,7 +463,8 @@ class OpenSRS {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 		}
 		//myadmin_log('domains', 'info', json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
-		foreach ($osrsHandler->resultFullRaw as $key => $data)
+		$resultValues = array_values($osrsHandler->resultFullRaw);
+		foreach ($resultValues as $data)
 			if (isset($data['domain']) && $data['domain'] == $domain)
 				return $data['price'];
 		return false;
@@ -601,7 +603,7 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 		if (!$fp) {
-			myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error', __LINE__, __FILE__);
+			myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error '.$errno.' '.$errstr, __LINE__, __FILE__);
 			return false;
 		} else {
 			// post the data to the server
@@ -669,7 +671,7 @@ class OpenSRS {
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
 			return false;
-			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned error on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -744,7 +746,7 @@ class OpenSRS {
 			$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 			$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 			if (!$fp) {
-				$result = 'UnKnown error occurred.';
+				myadmin_log('domains', 'info', "OpenSRS::".__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 				$endPages = TRUE;
 			} else {
 				// post the data to the server
@@ -822,7 +824,7 @@ class OpenSRS {
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
 			$result2 = 'UnKnown Error';
-			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned error on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
