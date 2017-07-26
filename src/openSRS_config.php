@@ -13,34 +13,34 @@ define('OPENSRSURI', __DIR__);
 * OpenSRS Domain service directories include provisioning, lookup, and dns
 */
 
-define('OPENSRSDOMAINS', OPENSRSURI . DS.'domains');
+define('OPENSRSDOMAINS', OPENSRSURI.DS.'domains');
 
 /**
 * OpenSRS trust service directory
 */
-define('OPENSRSTRUST', OPENSRSURI . DS.'trust');
+define('OPENSRSTRUST', OPENSRSURI.DS.'trust');
 
 /**
 * OpenSRS publishing service directory
 */
-define('OPENSRSPUBLISHING', OPENSRSURI . DS.'publishing');
+define('OPENSRSPUBLISHING', OPENSRSURI.DS.'publishing');
 
 /**
 * OpenSRS email service (OMA) directory
 */
-define('OPENSRSOMA', OPENSRSURI . DS.'OMA');
+define('OPENSRSOMA', OPENSRSURI.DS.'OMA');
 
 /**
 * OpenSRS email service (APP) directory
 */
-define('OPENSRSMAIL', OPENSRSURI . DS.'mail');
+define('OPENSRSMAIL', OPENSRSURI.DS.'mail');
 
 
-define('OPENSRSFASTLOOKUP', OPENSRSURI . DS.'fastlookup');
+define('OPENSRSFASTLOOKUP', OPENSRSURI.DS.'fastlookup');
 
 
 if (!defined('OPENSRS_USERNAME'))
-	require_once __DIR__ . '/../../../../include/config/config.settings.php';
+	require_once __DIR__.'/../../../../include/config/config.settings.php';
 
 /**
 * OpenSRS reseller username

@@ -16,8 +16,7 @@ use opensrs\Request;
  * OpenSRS Domain Class
  * @access public
  */
-class OpenSRS
-{
+class OpenSRS {
 	public $id;
 	public $cookie;
 	public $osrsHandler_all_info;
@@ -44,9 +43,9 @@ class OpenSRS
 	public function __construct($id = false) {
 		$this->settings = get_module_settings($this->module);
 		if ($id != false)
-			$this->id = (int)$id;
+			$this->id = (int) $id;
 		elseif (isset($GLOBALS['tf']->variables->request['id']))
-			$this->id = (int)$GLOBALS['tf']->variables->request['id'];
+			$this->id = (int) $GLOBALS['tf']->variables->request['id'];
 		else
 			return;
 		$this->serviceInfo = get_service($this->id, $this->module);
@@ -169,7 +168,7 @@ class OpenSRS
 		}
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
 		if (!isset($osrsHandler->resultFullRaw['attributes'])) {
-			myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned " . json_encode($osrsHandler), __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
 			return false;
 		}
 		$cookie = $osrsHandler->resultFullRaw['attributes']['cookie'];
@@ -559,7 +558,7 @@ class OpenSRS
 	 * @return bool
 	 */
 	public static function lock($domain, $lock = TRUE) {
-		if($lock === TRUE)
+		if ($lock === TRUE)
 			$lockStatusUpdate = 1;
 		else
 			$lockStatusUpdate = 0;
@@ -596,25 +595,25 @@ class OpenSRS
 		$header = '';
 		$header .= "POST $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
-		$header .= 'X-Username: '.$username . "\r\n";
-		$header .= 'X-Signature: '.$signature . "\r\n";
-		$header .= 'Content-Length: '.mb_strlen($xml) . "\r\n\r\n";
+		$header .= 'X-Username: '.$username."\r\n";
+		$header .= 'X-Signature: '.$signature."\r\n";
+		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 		if (!$fp)
-			$result2= 'UnKnown Error';
+			$result2 = 'UnKnown Error';
 		else {
 			// post the data to the server
-			fputs($fp, $header . $xml);
+			fputs($fp, $header.$xml);
 			while (!feof($fp)) {
 				$res = fgets($fp, 1024);
-				$line[]=$res;
+				$line[] = $res;
 			}
 			fclose($fp);
-			if($line[20])
-					$result2=true;
+			if ($line[20])
+					$result2 = true;
 			else
-				$result2=$line[17];
+				$result2 = $line[17];
 		}
 		return true;
 	}
@@ -662,26 +661,26 @@ class OpenSRS
 		$header = '';
 		$header .= "POST $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
-		$header .= 'X-Username: '.$username . "\r\n";
-		$header .= 'X-Signature: '.$signature . "\r\n";
-		$header .= 'Content-Length: '.mb_strlen($xml) . "\r\n\r\n";
+		$header .= 'X-Username: '.$username."\r\n";
+		$header .= 'X-Signature: '.$signature."\r\n";
+		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			$result2= 'UnKnown Error';
+			$result2 = 'UnKnown Error';
 			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned error on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
-			fputs($fp, $header . $xml);
+			fputs($fp, $header.$xml);
 			while (!feof($fp)) {
 				$res = fgets($fp, 1024);
-				$line[]=$res;
+				$line[] = $res;
 			}
 			fclose($fp);
-			if($line[20])
-				$result2=$line[17];
+			if ($line[20])
+				$result2 = $line[17];
 			else
-				$result2=$line[17];
+				$result2 = $line[17];
 			$result2 = trim(strip_tags($result2));
 			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
 		}
@@ -739,27 +738,27 @@ class OpenSRS
 			$header = '';
 			$header .= "POST $url HTTP/1.0\r\n";
 			$header .= "Content-Type: text/xml\r\n";
-			$header .= 'X-Username: ' . OPENSRS_USERNAME . "\r\n";
-			$header .= 'X-Signature: ' . $signature . "\r\n";
-			$header .= 'Content-Length: ' . mb_strlen($xml) . "\r\n\r\n";
-			$fp = fsockopen ("ssl://$host", $port, $errno, $errstr, 30);
+			$header .= 'X-Username: '.OPENSRS_USERNAME."\r\n";
+			$header .= 'X-Signature: '.$signature."\r\n";
+			$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
+			$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 			if (!$fp) {
 				$title = 'Error';
-				$result= 'UnKnown error occurred.';
+				$result = 'UnKnown error occurred.';
 				$end_pages = true;
 			} else {
 				// post the data to the server
-				fputs ($fp, $header . $xml);
+				fputs($fp, $header.$xml);
 				$i = 0;
 				$xmlresponseobj = null;
 				while (!feof($fp)) {
-					$res = fgets ($fp, 1024);
-					$line[]=$res;
-					if($i >=6)
+					$res = fgets($fp, 1024);
+					$line[] = $res;
+					if ($i >= 6)
 						$xmlresponseobj .= $res;
 					$i++;
 				}
-				fclose ($fp);
+				fclose($fp);
 				$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
 				$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
 				if (!isset($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
@@ -816,22 +815,22 @@ class OpenSRS
 		$header = '';
 		$header .= "POST $url HTTP/1.0\r\n";
 		$header .= "Content-Type: text/xml\r\n";
-		$header .= 'X-Username: ' . $username . "\r\n";
-		$header .= 'X-Signature: ' . $signature . "\r\n";
-		$header .= 'Content-Length: ' . mb_strlen($xml) . "\r\n\r\n";
+		$header .= 'X-Username: '.$username."\r\n";
+		$header .= 'X-Signature: '.$signature."\r\n";
+		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			$result2= 'UnKnown Error';
+			$result2 = 'UnKnown Error';
 			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned error on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
-			fputs($fp, $header . $xml);
+			fputs($fp, $header.$xml);
 			$i = 0;
 			$xmlresponseobj = null;
 			while (!feof($fp)) {
 				$res = fgets($fp);
-				if($i >=6 ) {
+				if ($i >= 6) {
 					$xmlresponseobj .= $res;
 				}
 				$i++;
