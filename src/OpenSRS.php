@@ -477,12 +477,12 @@ class OpenSRS {
 	 * @param string $function the search function to perform
 	 * @return array returns an array containing the search results
 	 */
-	public static function search_domain($domain, $function) {
+	public static function searchDomain($domain, $function) {
 		$final = [];
 		$tlds = get_available_domain_tlds_by_tld();
 		$tldPrices = get_service_tld_pricing();
 		if (in_array($function, ['allinoneDomain']))
-			myadmin_log('domains', 'error', "search_domain call passed obsolete function $function, use SuggestDomain instead.", __LINE__, __FILE__);
+			myadmin_log('domains', 'error', "searchDomain call passed obsolete function $function, use SuggestDomain instead.", __LINE__, __FILE__);
 		if (in_array($function, ['allinoneDomain', 'SuggestDomain']))
 			$callstring = json_encode(
 				[
