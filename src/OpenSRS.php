@@ -11,6 +11,8 @@ namespace Detain\MyAdminOpenSRS;
 
 require_once __DIR__.'/openSRS_loader.php';
 use opensrs\Request;
+use opensrs\APIException;
+use opensrs\Exception;
 
 /**
  * OpenSRS Domain Class
