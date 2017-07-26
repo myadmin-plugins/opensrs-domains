@@ -478,7 +478,7 @@ class OpenSRS {
 	public static function search_domain($domain, $function) {
 		$final = [];
 		$tlds = get_available_domain_tlds_by_tld();
-		$tld_prices = get_service_tld_pricing();
+		$tldPrices = get_service_tld_pricing();
 		if (in_array($function, ['allinoneDomain']))
 			myadmin_log('domains', 'error', "search_domain call passed obsolete function $function, use SuggestDomain instead.", __LINE__, __FILE__);
 		if (in_array($function, ['allinoneDomain', 'SuggestDomain']))
@@ -518,27 +518,27 @@ class OpenSRS {
 		//	echo (" In: ". $callstring ."<br><br><br><br>");
 		//	echo ("Out: ". $osrsHandler->resultFormatted);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
-			$result_types = array_keys($osrsHandler->resultFullRaw['attributes']);
-			foreach ($result_types as $result_type)
-				if (isset($osrsHandler->resultFullRaw['attributes'][$result_type]['items']))
-					foreach ($osrsHandler->resultFullRaw['attributes'][$result_type]['items'] as $idx => $data)
+			$resultTypes = array_keys($osrsHandler->resultFullRaw['attributes']);
+			foreach ($resultTypes as $resultType)
+				if (isset($osrsHandler->resultFullRaw['attributes'][$resultType]['items']))
+					foreach ($osrsHandler->resultFullRaw['attributes'][$resultType]['items'] as $idx => $data)
 						if (isset($data['domain'])) {
 							$tld = get_domain_tld($data['domain']);
 							if ($tld != '') {
 								if ($tld[0] != '.')
 									$tld = '.'.$tld;
 								if (isset($tlds[$tld])) {
-									$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['id'] = $tlds[$tld]['id'];
-									$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['tld'] = $tld;
-									$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['cost'] = $tlds[$tld]['cost'];
-									if (isset($tld_prices[$tld]['new'])) {
-										$diff = bcsub($tlds[$tld]['cost'], $tld_prices[$tld]['new'], 2);
-										if (isset($tld_prices[$tld]['new']))
-											$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['new'] = bcadd($tld_prices[$tld]['new'], $diff, 2);
-										if (isset($tld_prices[$tld]['renewal']))
-											$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['renewal'] = bcadd($tld_prices[$tld]['renewal'], $diff, 2);
-										if (isset($tld_prices[$tld]['transfer']))
-											$osrsHandler->resultFullRaw['attributes'][$result_type]['items'][$idx]['transfer'] = bcadd($tld_prices[$tld]['transfer'], $diff, 2);
+									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['id'] = $tlds[$tld]['id'];
+									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['tld'] = $tld;
+									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['cost'] = $tlds[$tld]['cost'];
+									if (isset($tldPrices[$tld]['new'])) {
+										$diff = bcsub($tlds[$tld]['cost'], $tldPrices[$tld]['new'], 2);
+										if (isset($tldPrices[$tld]['new']))
+											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['new'] = bcadd($tldPrices[$tld]['new'], $diff, 2);
+										if (isset($tldPrices[$tld]['renewal']))
+											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['renewal'] = bcadd($tldPrices[$tld]['renewal'], $diff, 2);
+										if (isset($tldPrices[$tld]['transfer']))
+											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['transfer'] = bcadd($tldPrices[$tld]['transfer'], $diff, 2);
 									}
 								} else
 									myadmin_log('domains', 'info', "TLD $tld was not set", __LINE__, __FILE__);
@@ -548,7 +548,7 @@ class OpenSRS {
 			$final['domainData'] = $osrsHandler->resultFullRaw;
 		}
 		$final['tlds'] = $tlds;
-		//$final['tld_prices'] = $tld_prices;
+		//$final['tldPrices'] = $tldPrices;
 		return $final;
 	}
 
@@ -563,7 +563,7 @@ class OpenSRS {
 		else
 			$lockStatusUpdate = 0;
 		$username = OPENSRS_USERNAME;
-		$private_key = OPENSRS_KEY;
+		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding="UTF-8" standalone="no" ?>
 			<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 			<OPS_envelope>
@@ -588,7 +588,7 @@ class OpenSRS {
 			</body>
 			</OPS_envelope>
 		';
-		$signature = md5(md5($xml.$private_key).$private_key);
+		$signature = md5(md5($xml.$privateKey).$privateKey);
 		$host = 'rr-n1-tor.opensrs.net';
 		$port = 55443;
 		$url = '/';
@@ -629,7 +629,7 @@ class OpenSRS {
 		else
 			$privacyStatusUpdate = 'disable';
 		$username = OPENSRS_USERNAME;
-		$private_key = OPENSRS_KEY;
+		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding="UTF-8" standalone="no" ?>
 <!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
@@ -653,7 +653,7 @@ class OpenSRS {
 		</data_block>
 	</body>
 </OPS_envelope>';
-		$signature = md5(md5($xml.$private_key).$private_key);
+		$signature = md5(md5($xml.$privateKey).$privateKey);
 		$prefix = 'ssl://';
 		$host = 'rr-n1-tor.opensrs.net';
 		$port = 55443;
@@ -699,13 +699,13 @@ class OpenSRS {
 			$startDate = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
 		if ($endDate == FALSE)
 			$endDate = date('Y-m-d', strtotime(date('Y').'-12-31 +20 years'));
-		$from_date = date('Y-m-d', strtotime($startDate));
-		$to_date = date('Y-m-d', strtotime($endDate));
+		$fromDate = date('Y-m-d', strtotime($startDate));
+		$toDate = date('Y-m-d', strtotime($endDate));
 		$limit = 99999;
 		$page = 0;
-		$end_pages = FALSE;
+		$endPages = FALSE;
 		$domains = [];
-		while ($end_pages == FALSE) {
+		while ($endPages == FALSE) {
 			$page++;
 			$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\' ?>
 <!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
@@ -722,8 +722,8 @@ class OpenSRS {
 			<item key="attributes">
 				<dt_assoc>
 					<item key="limit">'.$limit.'</item>
-					<item key="exp_from">'.$from_date.'</item>
-					<item key="exp_to">'.$to_date.'</item>
+					<item key="exp_from">'.$fromDate.'</item>
+					<item key="exp_to">'.$toDate.'</item>
 					<item key="page">'.$page.'</item>
 				</dt_assoc>
 			</item>
@@ -745,7 +745,7 @@ class OpenSRS {
 			if (!$fp) {
 				$title = 'Error';
 				$result = 'UnKnown error occurred.';
-				$end_pages = TRUE;
+				$endPages = TRUE;
 			} else {
 				// post the data to the server
 				fputs($fp, $header.$xml);
@@ -763,13 +763,13 @@ class OpenSRS {
 				$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
 				if (!isset($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
 					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($array1), __LINE__, __FILE__);
-					$end_pages = TRUE;
+					$endPages = TRUE;
 				} else {
 					$domainArray = $array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
-					foreach ($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'] as $idx => $dom_data)
-						$domains[$dom_data['dt_assoc']['item'][1]] = $dom_data['dt_assoc']['item'][2];
+					foreach ($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'] as $idx => $domainData)
+						$domains[$domainData['dt_assoc']['item'][1]] = $domainData['dt_assoc']['item'][2];
 					if (sizeof($domainArray) < $limit)
-						$end_pages = TRUE;
+						$endPages = TRUE;
 				}
 			}
 		}
@@ -784,7 +784,7 @@ class OpenSRS {
 	 */
 	public static function redeem_domain($domain) {
 		$username = OPENSRS_USERNAME;
-		$private_key = OPENSRS_KEY;
+		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
 				<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
 				<OPS_envelope>
@@ -807,7 +807,7 @@ class OpenSRS {
 					</body>
 				</OPS_envelope>
 			';
-		$signature = md5(md5($xml.$private_key).$private_key);
+		$signature = md5(md5($xml.$privateKey).$privateKey);
 		$prefix = 'ssl://';
 		$host = 'rr-n1-tor.opensrs.net';
 		$port = 55443;
