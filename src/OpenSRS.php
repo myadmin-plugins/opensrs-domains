@@ -670,8 +670,8 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			return FALSE;
 			myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			return FALSE;
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
