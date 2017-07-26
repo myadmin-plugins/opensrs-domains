@@ -433,10 +433,10 @@ class OpenSRS {
 	 * Checks the OpenSRS price for a domain name. Can be called statically.
 	 *
 	 * @param string $domain the domain name to lookup the price for
-	 * @param string $reg_type registration type, defaults to 'new', can be new, transfer, or renew
+	 * @param string $regType registration type, defaults to 'new', can be new, transfer, or renew
 	 * @return false|float false if there was an error or the price
 	 */
-	public static function lookup_domain_price($domain, $reg_type = 'new') {
+	public static function lookup_domain_price($domain, $regType = 'new') {
 		// Put the data to the Formatted array
 		$callstring = json_encode(
 			[
@@ -447,7 +447,7 @@ class OpenSRS {
 			'attributes' => [
 				//'searchstring' => $domain,
 				'domain' => $domain,
-				'reg_type' => $reg_type,
+				'reg_type' => $regType,
 				//'tlds' => array_keys(get_available_domain_tlds_by_tld()),
 				//'tlds' => array(get_domain_tld($domain)),
 			]
@@ -601,7 +601,8 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 		if (!$fp)
-			$result2 = 'UnKnown Error';
+				myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error', __LINE__, __FILE__);
+			return false;
 		else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -610,10 +611,10 @@ class OpenSRS {
 				$line[] = $res;
 			}
 			fclose($fp);
-			if ($line[20])
-					$result2 = TRUE;
-			else
-				$result2 = $line[17];
+			if (!$line[20]) {
+				myadmin_log(self::$module, 'debug', 'OpenSRS Failed - '.$line[17], __LINE__, __FILE__);
+				return false;
+			}
 		}
 		return true;
 	}
@@ -694,7 +695,6 @@ class OpenSRS {
 	 * @return array array of domains in the format of domain => expire date
 	 */
 	public static function list_domains_by_expirey_date($startDate = FALSE, $endDate = FALSE) {
-		$module = 'domains';
 		if ($startDate == FALSE)
 			$startDate = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
 		if ($endDate == FALSE)
@@ -743,7 +743,6 @@ class OpenSRS {
 			$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 			$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 			if (!$fp) {
-				$title = 'Error';
 				$result = 'UnKnown error occurred.';
 				$endPages = TRUE;
 			} else {
@@ -838,9 +837,9 @@ class OpenSRS {
 			fclose($fp);
 			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
 			$array1 = json_decode(json_encode($obj1), true); // Convert to array
-			$result_array = $array1['body']['data_block']['dt_assoc'];
-			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned {$result_array}", __LINE__, __FILE__);
-			return $result_array;
+			$resultArray = $array1['body']['data_block']['dt_assoc'];
+			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
+			return $resultArray;
 		}
 	}
 }
