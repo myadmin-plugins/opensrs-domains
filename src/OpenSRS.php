@@ -308,7 +308,7 @@ class OpenSRS {
 	 * @param int $getRequestAddress Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
 	 * @return array an array of result information.
 	 */
-	public static function transfer_check($domain, $checkStatus = 0, $getRequestAddress = 0) {
+	public static function transferCheck($domain, $checkStatus = 0, $getRequestAddress = 0) {
 		$callstring = json_encode(
 			[
 			'func' => 'transCheck',
@@ -344,7 +344,7 @@ class OpenSRS {
 	 * @param string $type Type of query. Allowed values are: 'admin—Returns' - admin contact information.	  'all_info' - Returns all information. 'auto_renew_flag' - Deprecated, Returned list of domains. 'billing' - Returns billing contact information. 'ca_whois_display_setting' - Returns the current CIRA Whois Privacy setting for .CA domains. 'domain_auth_info' ' - Returns domain authorization code, if applicable. 'expire_action' Returns the action to be taken upon domain expiry, specifically whether to auto-renew the domain, or let it expire silently. 'forwarding_email' - Returns forwarding email for .NAME 2nd level. 'it_whois_display_setting' - Returns the current Whois Privacy setting for .IT domains. 'list' - Returns list of domains for user. 'nameservers' - Returns nameserver information. 'owner' - Returns owner contact information. 'rsp_whois_info' - Returns name and contact information for RSP. 'status' - Returns lock or escrow status of the domain. 'tech' - Returns tech contact information. 'tld_data' - Returns additional information that is required by some registries, such as the residency of the registrant. 'trademark' - Deprecated. Used for .CA domains; returns 'Y' or 'N' value indicating whether the registered owner of the domain name is the legal holder of the trademark for that word. 'waiting history' - Returns information on asynchronous requests. 'whois_privacy_state ' - Returns the state for the WHOIS Privacy feature: enabled, disabled, enabling, or disabling. Note: If the TLD does not allow WHOIS Privacy, always returns Disabled. 'xpack_waiting_history' - Returns the state of completed/cancelled requests not yet deleted from the database for .DK domains. All completed/cancelled requests are deleted from the database two
 	 * @return array an array of result information.
 	 */
-	public static function lookup_get_domain($domain, $type = 'all') {
+	public static function lookupGetDomain($domain, $type = 'all') {
 		$callstring = json_encode(
 			[
 			'func' => 'lookupGetDomain',
@@ -437,7 +437,7 @@ class OpenSRS {
 	 * @param string $regType registration type, defaults to 'new', can be new, transfer, or renew
 	 * @return false|float false if there was an error or the price
 	 */
-	public static function lookup_domain_price($domain, $regType = 'new') {
+	public static function lookupDomainPrice($domain, $regType = 'new') {
 		// Put the data to the Formatted array
 		$callstring = json_encode(
 			[
@@ -697,7 +697,7 @@ class OpenSRS {
 	 * @param bool|false|string $endDate   end date for lookups, or false(default) or 12-31 in 20 years
 	 * @return array array of domains in the format of domain => expire date
 	 */
-	public static function list_domains_by_expirey_date($startDate = FALSE, $endDate = FALSE) {
+	public static function listDomainsByExpireyDate($startDate = FALSE, $endDate = FALSE) {
 		if ($startDate == FALSE)
 			$startDate = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
 		if ($endDate == FALSE)
@@ -784,7 +784,7 @@ class OpenSRS {
 	 * @param string $domain the domain name or part to search for
 	 * @return array returns true if domain cancelled else false
 	 */
-	public static function redeem_domain($domain) {
+	public static function redeemDomain($domain) {
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
@@ -824,7 +824,7 @@ class OpenSRS {
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
 			$result2 = 'UnKnown Error';
-			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -841,7 +841,7 @@ class OpenSRS {
 			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
 			$array1 = json_decode(json_encode($obj1), true); // Convert to array
 			$resultArray = $array1['body']['data_block']['dt_assoc'];
-			myadmin_log('domains', 'info', "OpenSRS::redeem_domain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
 			return $resultArray;
 		}
 	}
