@@ -600,10 +600,10 @@ class OpenSRS {
 		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
-		if (!$fp)
-				myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error', __LINE__, __FILE__);
+		if (!$fp) {
+			myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error', __LINE__, __FILE__);
 			return false;
-		else {
+		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
 			while (!feof($fp)) {
