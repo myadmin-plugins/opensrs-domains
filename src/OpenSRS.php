@@ -415,7 +415,7 @@ class OpenSRS {
 	 * @param string $domain the domain name to lookup
 	 * @return bool returns true if the domain is available, false otherwise
 	 */
-	public static function check_domain_available($domain) {
+	public static function checkDomainAvailable($domain) {
 		$result = OpenSRS::lookupDomain($domain);
 		if (isset($result['attributes']['status']))
 			return ($result['attributes']['status'] == 'available' ? TRUE : FALSE);
@@ -626,7 +626,7 @@ class OpenSRS {
 	 * @param string $domain the domain name to set status on
 	 * @param bool $enabled true if privacy status should be on, false if not
 	 */
-	public static function whois_privacy($domain, $enabled) {
+	public static function whoisPrivacy($domain, $enabled) {
 		if ($enabled == TRUE)
 			$privacyStatusUpdate = 'enable';
 		else
@@ -671,7 +671,7 @@ class OpenSRS {
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
 			return FALSE;
-			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -685,7 +685,7 @@ class OpenSRS {
 			else
 				$result2 = $line[17];
 			$result2 = trim(strip_tags($result2));
-			myadmin_log('domains', 'info', "OpenSRS::whois_privacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
+			myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
 		}
 		return TRUE;
 	}

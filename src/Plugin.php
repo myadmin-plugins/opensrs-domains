@@ -63,7 +63,7 @@ class Plugin {
 		$settings = get_module_settings(self::$module);
 		myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__);
 		function_requirements('class.OpenSRS');
-		OpenSRS::whois_privacy($serviceInfo[$settings['PREFIX'].'_hostname'], TRUE);
+		OpenSRS::whoisPrivacy($serviceInfo[$settings['PREFIX'].'_hostname'], TRUE);
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Plugin {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		function_requirements('class.OpenSRS');
-		OpenSRS::whois_privacy($serviceInfo[$settings['PREFIX'].'_hostname'], FALSE);
+		OpenSRS::whoisPrivacy($serviceInfo[$settings['PREFIX'].'_hostname'], FALSE);
 	}
 
 	/**
