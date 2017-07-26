@@ -769,7 +769,8 @@ class OpenSRS {
 					$endPages = TRUE;
 				} else {
 					$domainArray = $array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
-					foreach ($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'] as $idx => $domainData)
+					$domainValues = array_values($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']);
+					foreach ($domainValues as $domainData)
 						$domains[$domainData['dt_assoc']['item'][1]] = $domainData['dt_assoc']['item'][2];
 					if (sizeof($domainArray) < $limit)
 						$endPages = TRUE;
