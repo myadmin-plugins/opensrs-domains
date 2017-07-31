@@ -46,8 +46,8 @@ class Plugin {
 		$addon->setModule(self::$module)
 			->set_text('Whois Privacy')
 			->set_cost(OPENSRS_PRIVACY_COST)
-			->set_enable([__CLASS__, 'doAddonEnable'])
-			->set_disable([__CLASS__, 'doAddonDisable'])
+			->setEnable([__CLASS__, 'doAddonEnable'])
+			->setDisable([__CLASS__, 'doAddonDisable'])
 			->register();
 		$service->addAddon($addon);
 	}
