@@ -53,12 +53,12 @@ class Plugin {
 	}
 
 	/**
-	 * @param \Service_Order $serviceOrder
+	 * @param \ServiceOrder $serviceOrder
 	 * @param                $repeatInvoiceId
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doAddonEnable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonEnable(\ServiceOrder $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__);
@@ -67,12 +67,12 @@ class Plugin {
 	}
 
 	/**
-	 * @param \Service_Order $serviceOrder
+	 * @param \ServiceOrder $serviceOrder
 	 * @param                $repeatInvoiceId
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doAddonDisable(\Service_Order $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonDisable(\ServiceOrder $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		function_requirements('class.OpenSRS');
