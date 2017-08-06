@@ -1,5 +1,5 @@
 {
-    "name": "detain\/myadmin-opensrs-domains",
+    "name": "detain/myadmin-opensrs-domains",
     "type": "myadmin-plugin",
     "description": "Opensrs Domains Class",
     "keywords": [
@@ -21,16 +21,16 @@
     "require": {
         "php": ">=5.0.0",
         "ext-soap": "*",
-        "symfony\/event-dispatcher": "*",
-        "detain\/myadmin-plugin-installer": "dev-master",
-        "roave\/security-advisories": "dev-master"
+        "symfony/event-dispatcher": "*",
+        "detain/myadmin-plugin-installer": "dev-master",
+        "roave/security-advisories": "dev-master"
     },
     "require-dev": {
-        "phpunit\/phpunit": "*",
-        "vlucas\/phpdotenv": "*",
-        "codeclimate\/php-test-reporter": "dev-master",
-        "satooshi\/php-coveralls": "*",
-        "codacy\/coverage": "dev-master"
+        "phpunit/phpunit": "*",
+        "vlucas/phpdotenv": "*",
+        "codeclimate/php-test-reporter": "dev-master",
+        "satooshi/php-coveralls": "*",
+        "codacy/coverage": "dev-master"
     },
     "autoload": {
         "psr-4": {
