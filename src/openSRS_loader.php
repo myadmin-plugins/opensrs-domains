@@ -8,9 +8,7 @@ use opensrs\Request;
  * Method to convert Array -> Object -> Array.
  *
  * @param hash $data Containing array object
- *
- * @return stdClass Object $object   Containing stdClass object
- *
+ * @return \hash|\stdClass
  * @since    3.4
  */
 function array2object($data) {

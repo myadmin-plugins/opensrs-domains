@@ -293,11 +293,9 @@ class OpenSRS {
 	 * Checks to see if the specified domain can be transferred in to OpenSRS, or
 	 * from one OpenSRS Reseller to another. This call can also be used to check
 	 * the status of the last transfer request on a given domain name.
-	 *
 	 * When you use the check_transfer action prior to initiating a transfer, the
 	 * transferable response parameter is most relevant, and if transferable = 0 ,
 	 * the reason field is also important.
-	 *
 	 * When you use the check_transfer action to determine the progress of a
 	 * transfer, the status parameter is most important. If the response indicates
 	 * that the transfer is in progress and the status is pending_registry , the
@@ -308,7 +306,7 @@ class OpenSRS {
 	 * @param string $domain the domain name to check transfer status of
 	 * @param int $checkStatus Flag to request the status of a transfer request. If the transfer state is returned as pending_registry and the Registry shows OpenSRS as the Registrar of record, OpenSRS schedules the completion of gTLD transfers. Allowed values are 0 or 1.
 	 * @param int $getRequestAddress Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
-	 * @return array an array of result information.
+	 * @return array|bool
 	 */
 	public static function transferCheck($domain, $checkStatus = 0, $getRequestAddress = 0) {
 		$callstring = json_encode(
@@ -344,7 +342,7 @@ class OpenSRS {
 	 *
 	 * @param string $domain the domain name to lookup	 *
 	 * @param string $type Type of query. Allowed values are: 'admin—Returns' - admin contact information.	  'all_info' - Returns all information. 'auto_renew_flag' - Deprecated, Returned list of domains. 'billing' - Returns billing contact information. 'ca_whois_display_setting' - Returns the current CIRA Whois Privacy setting for .CA domains. 'domain_auth_info' ' - Returns domain authorization code, if applicable. 'expire_action' Returns the action to be taken upon domain expiry, specifically whether to auto-renew the domain, or let it expire silently. 'forwarding_email' - Returns forwarding email for .NAME 2nd level. 'it_whois_display_setting' - Returns the current Whois Privacy setting for .IT domains. 'list' - Returns list of domains for user. 'nameservers' - Returns nameserver information. 'owner' - Returns owner contact information. 'rsp_whois_info' - Returns name and contact information for RSP. 'status' - Returns lock or escrow status of the domain. 'tech' - Returns tech contact information. 'tld_data' - Returns additional information that is required by some registries, such as the residency of the registrant. 'trademark' - Deprecated. Used for .CA domains; returns 'Y' or 'N' value indicating whether the registered owner of the domain name is the legal holder of the trademark for that word. 'waiting history' - Returns information on asynchronous requests. 'whois_privacy_state ' - Returns the state for the WHOIS Privacy feature: enabled, disabled, enabling, or disabling. Note: If the TLD does not allow WHOIS Privacy, always returns Disabled. 'xpack_waiting_history' - Returns the state of completed/cancelled requests not yet deleted from the database for .DK domains. All completed/cancelled requests are deleted from the database two
-	 * @return array an array of result information.
+	 * @return array|bool
 	 */
 	public static function lookupGetDomain($domain, $type = 'all') {
 		$callstring = json_encode(
@@ -379,9 +377,10 @@ class OpenSRS {
 
 	/**
 	 * Does a lookup on the domain and returns an array of information about it. Can be called statically.
+	 *
 	 * @param string $domain the domain name to lookup
 	 * @param bool|string $selected false to not use this, tld to use just the tld from the domain, or available to use aall availalbe tlds
-	 * @return array an array of result information.
+	 * @return array|bool
 	 */
 	public static function lookupDomain($domain, $selected = FALSE) {
 		//myadmin_log('domains', 'info', "Checking if domain $domain available", __LINE__, __FILE__);
@@ -418,7 +417,7 @@ class OpenSRS {
 	 * @return bool returns true if the domain is available, false otherwise
 	 */
 	public static function checkDomainAvailable($domain) {
-		$result = OpenSRS::lookupDomain($domain);
+		$result = self::lookupDomain($domain);
 		if ($result === FALSE)
 			return FALSE;
 		elseif (isset($result['attributes']['status']))
@@ -479,7 +478,7 @@ class OpenSRS {
 	 *
 	 * @param string $domain the domain name or part to search for
 	 * @param string $function the search function to perform
-	 * @return array returns an array containing the search results
+	 * @return array|bool
 	 */
 	public static function searchDomain($domain, $function) {
 		$final = [];
@@ -627,8 +626,10 @@ class OpenSRS {
 
 	/**
 	 * Enable/Disable the whois privacy for the given domain. Can be called statically.
-	 * @param string $domain the domain name to set status on
-	 * @param bool $enabled true if privacy status should be on, false if not
+	 *
+	 * @param string $domain  the domain name to set status on
+	 * @param bool   $enabled true if privacy status should be on, false if not
+	 * @return bool
 	 */
 	public static function whoisPrivacy($domain, $enabled) {
 		if ($enabled == TRUE)
@@ -750,7 +751,7 @@ class OpenSRS {
 			$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 			$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 			if (!$fp) {
-				myadmin_log('domains', 'info', "OpenSRS::".__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+				myadmin_log('domains', 'info', 'OpenSRS::' .__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 				$endPages = TRUE;
 			} else {
 				// post the data to the server
