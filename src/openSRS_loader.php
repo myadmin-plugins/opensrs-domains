@@ -7,23 +7,19 @@ use opensrs\Request;
 /**
  * Method to convert Array -> Object -> Array.
  *
- * @param hash $data Containing array object
+ * @param hash|array $data Containing array object
  * @return \hash|\stdClass
  * @since    3.4
  */
 function array2object($data) {
-	if (!is_array($data)) {
+	if (!is_array($data))
 		return $data;
-	}
 	$object = new stdClass();
-
-	foreach ($data as $name => $value) {
+	foreach ($data as $name => $value)
 		if (isset($name)) {
 			$name = strtolower(trim($name));
 			$object->$name = array2object($value);
 		}
-	}
-
 	return $object;
 }
 
