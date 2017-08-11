@@ -1,8 +1,7 @@
 <?php
 /**
  * OpenSRS Domain Related Functionality
- * Last Changed: $LastChangedDate: 2016-08-22 08:39:20 -0400 (Mon, 22 Aug 2016) $
- * @author detain
+ * @author Joe Huss <detain@interserver.net>
  * @copyright 2017
  * @package MyAdmin
  * @category Domains
