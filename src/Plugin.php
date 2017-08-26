@@ -41,8 +41,8 @@ class Plugin {
 	 */
 	public static function getAddon(GenericEvent $event) {
 		$service = $event->getSubject();
-		function_requirements('class.Addon');
-		$addon = new \Addon();
+		function_requirements('class.AddonHandler');
+		$addon = new \AddonHandler();
 		$addon->setModule(self::$module)
 			->set_text('Whois Privacy')
 			->set_cost(OPENSRS_PRIVACY_COST)
@@ -53,12 +53,12 @@ class Plugin {
 	}
 
 	/**
-	 * @param \ServiceOrder $serviceOrder
+	 * @param \ServiceHandler $serviceOrder
 	 * @param                $repeatInvoiceId
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doAddonEnable(\ServiceOrder $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonEnable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__);
@@ -67,12 +67,12 @@ class Plugin {
 	}
 
 	/**
-	 * @param \ServiceOrder $serviceOrder
+	 * @param \ServiceHandler $serviceOrder
 	 * @param                $repeatInvoiceId
 	 * @param bool           $regexMatch
 	 * @throws \Exception
 	 */
-	public static function doAddonDisable(\ServiceOrder $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
+	public static function doAddonDisable(\ServiceHandler $serviceOrder, $repeatInvoiceId, $regexMatch = FALSE) {
 		$serviceInfo = $serviceOrder->getServiceInfo();
 		$settings = get_module_settings(self::$module);
 		function_requirements('class.OpenSRS');
