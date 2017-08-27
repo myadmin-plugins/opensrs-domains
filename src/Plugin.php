@@ -101,7 +101,7 @@ class Plugin {
 		if ($GLOBALS['tf']->ima == 'admin') {
 			$menu->add_link(self::$module, 'choice=none.reusable_opensrs', 'images/icons/database_warning_48.png', 'ReUsable OpenSRS Licenses');
 			$menu->add_link(self::$module, 'choice=none.opensrs_list', 'images/icons/database_warning_48.png', 'OpenSRS Licenses Breakdown');
-			$menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', 'whm/createacct.gif', 'List all OpenSRS Licenses');
+			$menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', '/images/whm/createacct.gif', 'List all OpenSRS Licenses');
 		}
 	}
 
