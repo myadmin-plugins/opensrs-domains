@@ -28,12 +28,10 @@ function array2object($data) {
 	 * @return array
 	 */
 	function object2array($data) {
-	if (!is_object($data) && !is_array($data)) {
+	if (!is_object($data) && !is_array($data))
 		return $data;
-	}
-	if (is_object($data)) {
+	if (is_object($data))
 		$data = get_object_vars($data);
-	}
 
 	return array_map('object2array', $data);
 }
@@ -61,12 +59,10 @@ function processOpenSRS($type = '', $data = '') {
  */
 function convertArray2Formatted($type = '', $data = '') {
 	$resultString = '';
-	if ($type == 'json') {
+	if ($type == 'json')
 		$resultString = json_encode($data);
-	}
-	if ($type == 'yaml') {
+	if ($type == 'yaml')
 		$resultString = Spyc::YAMLDump($data);
-	}
 
 	return $resultString;
 }
@@ -78,12 +74,10 @@ function convertArray2Formatted($type = '', $data = '') {
  */
 function convertFormatted2array($type = '', $data = '') {
 	$resultArray = '';
-	if ($type == 'json') {
+	if ($type == 'json')
 		$resultArray = json_decode($data, TRUE);
-	}
-	if ($type == 'yaml') {
+	if ($type == 'yaml')
 		$resultArray = Spyc::YAMLLoad($data);
-	}
 
 	return $resultArray;
 }
@@ -94,9 +88,8 @@ function convertFormatted2array($type = '', $data = '') {
  */
 function array_filter_recursive($input) {
 	foreach ($input as &$value) {
-		if (is_array($value)) {
+		if (is_array($value))
 			$value = array_filter_recursive($value);
-		}
 	}
 
 	return array_filter($input);

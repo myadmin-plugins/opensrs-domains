@@ -835,9 +835,8 @@ class OpenSRS {
 			$xmlresponseobj = NULL;
 			while (!feof($fp)) {
 				$res = fgets($fp);
-				if ($i >= 6) {
+				if ($i >= 6)
 					$xmlresponseobj .= $res;
-				}
 				$i++;
 			}
 			fclose($fp);
