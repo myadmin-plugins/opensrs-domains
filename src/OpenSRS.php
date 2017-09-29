@@ -791,27 +791,26 @@ class OpenSRS {
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
-				<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
-				<OPS_envelope>
-					<header>
-						<version>0.9</version>
-					</header>
-					<body>
-						<data_block>
-							<dt_assoc>
-								<item key="protocol">XCP</item>
-								<item key="action">REDEEM</item>
-								<item key="object">DOMAIN</item>
-								<item key="attributes">
-									<dt_assoc>
-										<item key="domain">'.$domain.'</item>
-									</dt_assoc>
-								</item>
-							</dt_assoc>
-						</data_block>
-					</body>
-				</OPS_envelope>
-			';
+<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+<OPS_envelope>
+	<header>
+		<version>0.9</version>
+	</header>
+	<body>
+		<data_block>
+			<dt_assoc>
+				<item key="protocol">XCP</item>
+				<item key="action">REDEEM</item>
+				<item key="object">DOMAIN</item>
+				<item key="attributes">
+					<dt_assoc>
+						<item key="domain">'.$domain.'</item>
+					</dt_assoc>
+				</item>
+			</dt_assoc>
+		</data_block>
+	</body>
+</OPS_envelope>';
 		$signature = md5(md5($xml.$privateKey).$privateKey);
 		$prefix = 'ssl://';
 		$host = 'rr-n1-tor.opensrs.net';
@@ -849,6 +848,25 @@ class OpenSRS {
 
 	public static function getEventTypes() {
 		return [
+			'types' => [
+				'domain' => [
+					'created' => 'The domain was added to the system due to any number of actions including, registration, transfer completion, redemption, back-end import, etc.  Basically if a domain is added to our database for ANY reason, this event will be dispatched.',
+					'expired' => 'The domain has reached DAY 0 without being renewed.',
+					'nameserver_update' => 'The nameservers set for this domain have changed.',
+					'registered' => 'A domain registration has completed.',
+					'registrant_verification_status_change' => 'Notifies of a change to the registrant verification status for this domain.  This gives visibility into the state of a registrants verification.  ',
+					'renewed' => 'This event will be fired whenever a renewal is processed for a domain, whther it be through auto-renewal, or a manually created renewal order.',
+					'zone_check_status_change' => 'For .de and .fr, will notify when the DNS/ZONE check has passed, or failed at the registry, as the domain is in jeopardy of being disabled by the registry if it remains invalid.',
+					'deleted' => 'A domain registration has been deleted.',
+				],
+				'order' => [
+					'claim_status_change' => 'An Order status has changed',
+					'status_change' => 'An Order status has changed',
+				],
+				'transfer' => [
+					'status_change' => 'The Transfer status has been changed.',
+				]
+			],
 			'common' => [
 				'all' => [
 					'event' => 'Specific Event being fired',
@@ -915,26 +933,6 @@ class OpenSRS {
 					],
 				],
 			],
-			'types' => [
-				'domain' => [
-					'created' => 'The domain was added to the system due to any number of actions including, registration, transfer completion, redemption, back-end import, etc.  Basically if a domain is added to our database for ANY reason, this event will be dispatched.',
-					'expired' => 'The domain has reached DAY 0 without being renewed.',
-					'nameserver_update' => 'The nameservers set for this domain have changed.',
-					'registered' => 'A domain registration has completed.',
-					'registrant_verification_status_change' => 'Notifies of a change to the registrant verification status for this domain.  This gives visibility into the state of a registrants verification.  ',
-					'renewed' => 'This event will be fired whenever a renewal is processed for a domain, whther it be through auto-renewal, or a manually created renewal order.',
-					'zone_check_status_change' => 'For .de and .fr, will notify when the DNS/ZONE check has passed, or failed at the registry, as the domain is in jeopardy of being disabled by the registry if it remains invalid.',
-					'deleted' => 'A domain registration has been deleted.',
-				],
-				'order' => [
-					'claim_status_change' => 'An Order status has changed',
-					'status_change' => 'An Order status has changed',
-				],
-				'transfer' => [
-					'status_change' => 'The Transfer status has been changed.',
-				]
-			],
-
 		];
 	}
 
