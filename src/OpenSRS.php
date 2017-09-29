@@ -940,6 +940,7 @@ class OpenSRS {
 	/**
 	 * Polls the OpenSRS server for a new Event
 	 *
+	 * @link https://help.opensrs.com/hc/en-us/articles/203245923-Event-Notifications
 	 * @param int $limit optional limit, defaults to 1 (which is also the recomended amount to process at once), allows for polling multiple (up to 100 maximum) events at a time
 	 * @return array returns some crap
 	 */
