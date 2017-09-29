@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
+<OPS_envelope>
+ <header>
+  <version>0.9</version>
+  </header>
+ <body>
+  <data_block>
+   <dt_assoc>
+    <item key="protocol">XCP</item>
+    <item key="object">EVENT</item>
+    <item key="response_code">200</item>
+    <item key="is_success">1</item>
+    <item key="response_text">Command successful</item>
+    <item key="transaction_id">2014-06-19 11:31:49 27660 101</item>
+    <item key="action">REPLY</item>
+    <item key="attributes">
+     <dt_assoc>
+      <item key="events">
+       <dt_array>
+        <item key="0">
+         <dt_assoc>
+          <item key="object_data">
+           <dt_assoc>
+            <item key="domain_name">tucows-13e97b6ef1b1c.com</item>
+            <item key="domain_id">808369</item>
+            <item key="expiration_date">2015-06-19T11:31:47Z</item>
+           </dt_assoc>
+          </item>
+          <item key="object">DOMAIN</item>
+          <item key="event_id">9c3baadb1fae18754ce5d86d94da6ded</item>
+          <item key="event">CREATED</item>
+          <item key="event_date">2014-06-19T15:31:47Z</item>
+         </dt_assoc>
+        </item>
+       </dt_array>
+      </item>
+      <item key="total">6</item>
+     </dt_assoc>
+    </item>
+   </dt_assoc>
+  </data_block>
+ </body>
+</OPS_envelope>

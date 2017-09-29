@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
+<OPS_envelope>
+ <header>
+  <version>0.9</version>
+  </header>
+ <body>
+  <data_block>
+   <dt_assoc>
+    <item key="protocol">XCP</item>
+    <item key="object">EVENT</item>
+    <item key="response_code">200</item>
+    <item key="is_success">1</item>
+    <item key="response_text">Command successful</item>
+    <item key="transaction_id">2014-06-19 13:35:54 8716 101</item>
+    <item key="action">REPLY</item>
+    <item key="attributes">
+     <dt_assoc>
+      <item key="events">
+       <dt_array>
+        <item key="0">
+         <dt_assoc>
+          <item key="object_data">
+           <dt_assoc>
+            <item key="domain_name">testandvalidate.claimsgathree</item>
+            <item key="claim_status">initiated</item>
+            <item key="order_id">442644</item>
+           </dt_assoc>
+          </item>
+          <item key="object">ORDER</item>
+          <item key="event_id">72a5d2b5ffe3fd892b39fffa292133f4</item>
+          <item key="event">CLAIM_STATUS_CHANGE</item>
+          <item key="event_date">2014-06-19T17:34:51Z</item>
+         </dt_assoc>
+        </item>
+       </dt_array>
+      </item>
+      <item key="total">2</item>
+     </dt_assoc>
+    </item>
+   </dt_assoc>
+  </data_block>
+ </body>
+</OPS_envelope>
