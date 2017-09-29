@@ -568,7 +568,7 @@ class OpenSRS {
 			$lockStatusUpdate = 0;
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
-		$xml = '<?xml version=\'1.0\' encoding="UTF-8" standalone="no" ?>
+		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
 	<header>
@@ -636,7 +636,7 @@ class OpenSRS {
 			$privacyStatusUpdate = 'disable';
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
-		$xml = '<?xml version=\'1.0\' encoding="UTF-8" standalone="no" ?>
+		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
 	<header>
@@ -713,8 +713,8 @@ class OpenSRS {
 		$domains = [];
 		while ($endPages == FALSE) {
 			$page++;
-			$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\' ?>
-<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+			$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
 	<header>
 		<version>0.9</version>
@@ -790,8 +790,8 @@ class OpenSRS {
 	public static function redeemDomain($domain) {
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
-		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
-<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
 	<header>
 		<version>0.9</version>
@@ -936,6 +936,66 @@ class OpenSRS {
 		];
 	}
 
+	public static function ackEvent($event_id) {
+		$username = OPENSRS_USERNAME;
+		$privateKey = OPENSRS_KEY;
+		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
+<OPS_envelope>
+ <header>
+  <version>0.9</version>
+  </header>
+ <body>
+  <data_block>
+   <dt_assoc>
+	<item key="protocol">XCP</item>
+	<item key="object">EVENT</item>
+	<item key="action">ACK</item>
+	<item key="attributes">
+	 <dt_assoc>
+	  <item key="event_id">'.$event_id.'</item>
+	 </dt_assoc>
+	</item>
+   </dt_assoc>
+  </data_block>
+ </body>
+</OPS_envelope>';
+		$signature = md5(md5($xml.$privateKey).$privateKey);
+		$prefix = 'ssl://';
+		$host = 'rr-n1-tor.opensrs.net';
+		$port = 55443;
+		$url = '/';
+		$header = '';
+		$header .= "post $url HTTP/1.0\r\n";
+		$header .= "Content-Type: text/xml\r\n";
+		$header .= 'X-Username: '.$username."\r\n";
+		$header .= 'X-Signature: '.$signature."\r\n";
+		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
+		// ssl:// requires OpenSSL to be installed
+		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
+		if (!$fp) {
+			myadmin_log('domains', 'error', "OpenSRS::ackEvent({$limit}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+		} else {
+			// post the data to the server
+			fputs($fp, $header.$xml);
+			$i = 0;
+			$xmlresponseobj = NULL;
+			while (!feof($fp)) {
+				$res = fgets($fp);
+				if ($i >= 6)
+					$xmlresponseobj .= $res;
+				$i++;
+			}
+			fclose($fp);
+			function_requirements('xml2array');
+			$array = xml2array($xmlresponseobj, 1, 'attribute');
+			$array = $array['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
+			$resultArray = self::response_to_array($array);
+			myadmin_log('domains', 'info', "OpenSRS::ackEvent({$event_id}) returned ".json_encode($resultArray), __LINE__, __FILE__);
+			return $resultArray['is_success'] == '1';
+		}
+	}
+
 
 	/**
 	 * Polls the OpenSRS server for a new Event
@@ -946,8 +1006,8 @@ class OpenSRS {
 	public static function pollEvent($limit = 1) {
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
-		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
-<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
 <OPS_envelope>
 	<header>
 		<version>0.9</version>
@@ -999,12 +1059,19 @@ class OpenSRS {
 			$array = $array['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
 			$resultArray = self::response_to_array($array);
 			myadmin_log('domains', 'info', "OpenSRS::pollEvent({$limit}) returned ".json_encode($resultArray), __LINE__, __FILE__);
+			if ($resultArray['is_success'] == '1') {
+				if (self::ackEvent($resultArray['attributes']['events']['event_id'])) {
+					// Add code here to log and process the poll event
+				}
+			}
 			return $resultArray;
 		}
 	}
 
 	public static function response_to_array($array) {
 		$out = [];
+		if (isset($array['attr']))
+			$array = [$array];
 		foreach ($array as $array_item) {
 			$key = $array_item['attr']['key'];
 			if (isset($array_item['value'])) {
@@ -1012,7 +1079,8 @@ class OpenSRS {
 			} elseif (isset($array_item['dt_assoc'])) {
 				$out[$key] = self::response_to_array($array_item['dt_assoc']['item']);
 			} elseif (isset($array_item['dt_array'])) {
-				$out[$key] = self::response_to_array($array_item['dt_array']['item']['dt_assoc']['item']);
+				//$out[$key] = self::response_to_array($array_item['dt_array']['item']['dt_assoc']['item']);
+				$out[$key] = self::response_to_array($array_item['dt_array']['item']);
 			}
 		}
 		return $out;
