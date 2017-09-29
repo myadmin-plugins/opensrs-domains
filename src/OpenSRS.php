@@ -856,17 +856,17 @@ class OpenSRS {
 					'event_date' => 'Date in ISO8601 (UTC) format',
 				],
 				'domain' => [
-					'domain_id' => '',
-					'domain_name' => '',
+					'domain_id' => 'Unique Domain Identifier',
+					'domain_name' => 'The Domain Name',
 				],
 				'order' => [
-					'order_id' => '',
-					'domain_name' => '',
+					'order_id' => 'Unique Order Identifier',
+					'domain_name' => 'The Domain Name',
 				],
 				'transfer' => [
-					'transfer_id',
-					'order_id' => '',
-					'domain_name' => '',
+					'transfer_id' => 'Unique Transfer Identifier',
+					'order_id' => 'Unique Order Identifier',
+					'domain_name' => 'The Domain Name',
 				],
 			],
 			'uncommon' => [
