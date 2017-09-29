@@ -569,29 +569,28 @@ class OpenSRS {
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version=\'1.0\' encoding="UTF-8" standalone="no" ?>
-			<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
-			<OPS_envelope>
-				<header>
-					<version>XML:0.1</version>
-				</header>
-				<body>
-					<data_block>
-						<dt_assoc>
-							<item key="protocol">XCP</item>
-							<item key="action">modify</item>
-							<item key="object">domain</item>
-							<item key="attributes">
-								<dt_assoc>
-									<item key="domain_name">'.$domain.'</item>
-									<item key="lock_state">'.$lockStatusUpdate.'</item>
-`											<item key="data">status</item>
-							</dt_assoc>
-						</item>
-					</dt_assoc>
-				</data_block>
-			</body>
-			</OPS_envelope>
-		';
+<!DOCTYPE OPS_envelope SYSTEM "ops.dtd">
+<OPS_envelope>
+	<header>
+		<version>XML:0.1</version>
+	</header>
+	<body>
+		<data_block>
+			<dt_assoc>
+				<item key="protocol">XCP</item>
+				<item key="action">modify</item>
+				<item key="object">domain</item>
+				<item key="attributes">
+				<dt_assoc>
+					<item key="domain_name">'.$domain.'</item>
+					<item key="lock_state">'.$lockStatusUpdate.'</item>
+`								<item key="data">status</item>
+				</dt_assoc>
+			</item>
+		</dt_assoc>
+	</data_block>
+</body>
+</OPS_envelope>';
 		$signature = md5(md5($xml.$privateKey).$privateKey);
 		$host = 'rr-n1-tor.opensrs.net';
 		$port = 55443;
@@ -674,7 +673,7 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'error', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 			return FALSE;
 		} else {
 			// post the data to the server
@@ -827,7 +826,7 @@ class OpenSRS {
 		// ssl:// requires OpenSSL to be installed
 		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
-			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			myadmin_log('domains', 'error', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
 			// post the data to the server
 			fputs($fp, $header.$xml);
@@ -846,5 +845,178 @@ class OpenSRS {
 			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
 			return $resultArray;
 		}
+	}
+
+	public static function getEventTypes() {
+		return [
+			'common' => [
+				'all' => [
+					'event' => 'Specific Event being fired',
+					'event_id' => 'Unique Identifier for this Event',
+					'event_date' => 'Date in ISO8601 (UTC) format',
+				],
+				'domain' => [
+					'domain_id' => '',
+					'domain_name' => '',
+				],
+				'order' => [
+					'order_id' => '',
+					'domain_name' => '',
+				],
+				'transfer' => [
+					'transfer_id',
+					'order_id' => '',
+					'domain_name' => '',
+				],
+			],
+			'uncommon' => [
+				'domain' => [
+					'created' => [
+						'expiration_date' => 'Date in ISO8601 (UTC) format'
+					],
+					'expired' => [
+						'expiration_date' => 'Date in ISO8601 (UTC) format'
+					],
+					'nameserver_update' => [
+						'nameserver_list' => 'Array of nameservers as set at the moment of this event',
+					],
+					'registered' => [
+						'expiration_date' => '',
+						'period' => 'Number of years registered for'
+					],
+					'registrant_verification_status_change' => [
+						'verification_status' => 'unverified pending verifying marking_as_verified verified suspended admin_reviewing bounced not_applicable',
+					],
+					'renewed' => [
+						'expiration_date' => 'Date in ISO8601 (UTC) format',
+						'period' => 'Number of years renewed for'
+					],
+					'zone_check_status_change' => [
+						'zone_check_status' => 'valid invalid'
+					],
+					'deleted' => [
+						'reason' => 'expired transfered auction historical by-request delete-domain-api',
+						'deletion_date' => 'Date in ISO8601 (UTC) format',
+						'redemption_grace_period_end_date' => 'Date in ISO8601 (UTC) format',
+					],
+				],
+				'order' => [
+					'claim_status_change' => [
+						'claim_status' => 'initiated declined cancelled accepted',
+					],
+					'status_change' => [
+						'order_status' => 'cancelled completed declined pending pending_fax processed waiting',
+						'order_reg_type' => 'landrush new premium renewal sunrise transfer whois_privacy',
+					],
+				],
+				'transfer' => [
+					'status_change' => [
+						'transfer_status' => 'cancelled completed pending_admin pending_owner pending_registry'
+					],
+				],
+			],
+			'types' => [
+				'domain' => [
+					'created' => 'The domain was added to the system due to any number of actions including, registration, transfer completion, redemption, back-end import, etc.  Basically if a domain is added to our database for ANY reason, this event will be dispatched.',
+					'expired' => 'The domain has reached DAY 0 without being renewed.',
+					'nameserver_update' => 'The nameservers set for this domain have changed.',
+					'registered' => 'A domain registration has completed.',
+					'registrant_verification_status_change' => 'Notifies of a change to the registrant verification status for this domain.  This gives visibility into the state of a registrants verification.  ',
+					'renewed' => 'This event will be fired whenever a renewal is processed for a domain, whther it be through auto-renewal, or a manually created renewal order.',
+					'zone_check_status_change' => 'For .de and .fr, will notify when the DNS/ZONE check has passed, or failed at the registry, as the domain is in jeopardy of being disabled by the registry if it remains invalid.',
+					'deleted' => 'A domain registration has been deleted.',
+				],
+				'order' => [
+					'claim_status_change' => 'An Order status has changed',
+					'status_change' => 'An Order status has changed',
+				],
+				'transfer' => [
+					'status_change' => 'The Transfer status has been changed.',
+				]
+			],
+
+		];
+	}
+
+
+	/**
+	 * Polls the OpenSRS server for a new Event
+	 *
+	 * @param int $limit optional limit, defaults to 1 (which is also the recomended amount to process at once), allows for polling multiple (up to 100 maximum) events at a time
+	 * @return array returns some crap
+	 */
+	public static function pollEvent($limit = 1) {
+		$username = OPENSRS_USERNAME;
+		$privateKey = OPENSRS_KEY;
+		$xml = '<?xml version=\'1.0\' encoding=\'UTF-8\' standalone=\'no\'?>
+<!DOCTYPE OPS_envelope SYSTEM \'ops.dtd\'>
+<OPS_envelope>
+	<header>
+		<version>0.9</version>
+	</header>
+	<body>
+		<data_block>
+			<dt_assoc>
+				<item key="protocol">XCP</item>
+				<item key="object">EVENT</item>
+				<item key="action">POLL</item>
+				<item key="attributes">
+					<dt_assoc>
+						<item key="limit">'.$limit.'</item>
+					</dt_assoc>
+				</item>
+			</dt_assoc>
+		</data_block>
+	</body>
+</OPS_envelope>';
+		$signature = md5(md5($xml.$privateKey).$privateKey);
+		$prefix = 'ssl://';
+		$host = 'rr-n1-tor.opensrs.net';
+		$port = 55443;
+		$url = '/';
+		$header = '';
+		$header .= "post $url HTTP/1.0\r\n";
+		$header .= "Content-Type: text/xml\r\n";
+		$header .= 'X-Username: '.$username."\r\n";
+		$header .= 'X-Signature: '.$signature."\r\n";
+		$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
+		// ssl:// requires OpenSSL to be installed
+		$fp = fsockopen($prefix.$host, $port, $errno, $errstr, 30);
+		if (!$fp) {
+			myadmin_log('domains', 'error', "OpenSRS::pollEvent({$limit}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+		} else {
+			// post the data to the server
+			fputs($fp, $header.$xml);
+			$i = 0;
+			$xmlresponseobj = NULL;
+			while (!feof($fp)) {
+				$res = fgets($fp);
+				if ($i >= 6)
+					$xmlresponseobj .= $res;
+				$i++;
+			}
+			fclose($fp);
+			function_requirements('xml2array');
+			$array = xml2array($xmlresponseobj, 1, 'attribute');
+			$array = $array['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
+			$resultArray = self::response_to_array($array);
+			myadmin_log('domains', 'info', "OpenSRS::pollEvent({$limit}) returned ".json_encode($resultArray), __LINE__, __FILE__);
+			return $resultArray;
+		}
+	}
+
+	public static function response_to_array($array) {
+		$out = [];
+		foreach ($array as $array_item) {
+			$key = $array_item['attr']['key'];
+			if (isset($array_item['value'])) {
+				$out[$key] = $array_item['value'];
+			} elseif (isset($array_item['dt_assoc'])) {
+				$out[$key] = self::response_to_array($array_item['dt_assoc']['item']);
+			} elseif (isset($array_item['dt_array'])) {
+				$out[$key] = self::response_to_array($array_item['dt_array']['item']['dt_assoc']['item']);
+			}
+		}
+		return $out;
 	}
 }
