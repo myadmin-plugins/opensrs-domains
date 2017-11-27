@@ -86,7 +86,7 @@ class Plugin {
 		$serviceClass = $event->getSubject();
 		if ($event['category'] == get_service_define('OPENSRS')) {
 			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__);
-			$return = $this->activate_domain($serviceClass->getId());
+			$return = self::activate_domain($serviceClass->getId());
 			$event['success'] = $return;
 			$event->stopPropagation();
 		}
