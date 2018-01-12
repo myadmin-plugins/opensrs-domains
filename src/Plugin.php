@@ -553,8 +553,8 @@ and then contact support@interserver.net to have them try the domain registratio
 <br>
 Interserver, Inc.<br>
 ';
-				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin_email_domain_error.tpl');
-				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin_email_domain_error.tpl');
+				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
+				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
 				myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
 				return false;
 			}
