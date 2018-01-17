@@ -5,7 +5,7 @@ $GLOBALS['modules'] = ['domains' => [
         'USE_REPEAT_INVOICE' => true,
         'USE_PACKAGES' => true,
         'BILLING_DAYS_OFFSET' => 45,
-        'IMGNAME' => 'server_add_48.png',
+        'IMGNAME' => 'domain.png',
         'REPEAT_BILLING_METHOD' => PRORATE_BILLING,
         'DELETE_PENDING_DAYS' => 45,
         'SUSPEND_DAYS' => 14,
