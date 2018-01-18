@@ -24,5 +24,5 @@ composer require detain/myadmin-opensrs-domains
 
 ## License
 
-The Opensrs Domains Class class is licensed under the LGPL-v2 license.
+The Opensrs Domains Class class is licensed under the LGPL-v2.1 license.
 
