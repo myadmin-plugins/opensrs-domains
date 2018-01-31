@@ -40,6 +40,9 @@ class Plugin {
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
 	public static function getAddon(GenericEvent $event) {
+		/**
+		 * @var \ServiceHandler $service
+		 */
 		$service = $event->getSubject();
 		function_requirements('class.AddonHandler');
 		$addon = new \AddonHandler();
