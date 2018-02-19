@@ -171,8 +171,12 @@ class Plugin {
 				if ($response !== false && isset($response['attributes']['expiredate'])) {
 					$parts = explode('-', $response['attributes']['expiredate']);
 					$expireyear =  $parts[0];
+					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
 					myadmin_log('domains', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
-					if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
+					/*if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
+						$renew = true;*/
+					$date_today = date('Y-m-d');
+					if (strtotime($expiry_full_date) >= strtotime($date_today))
 						$renew = true;
 				}
 			}
