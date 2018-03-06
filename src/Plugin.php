@@ -538,7 +538,7 @@ class Plugin {
 			}
 			$query = "update {$settings['TABLE']} set domain_extra='" . $db->real_escape(base64_encode(gzcompress(myadmin_stringify($extra)))) . "' where domain_id=$id";
 			$db->query($query, __LINE__, __FILE__);
-			if ((isset($error) && $error !== false) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
+			if ((isset($error) && $error !== false) /*&& isset($osrsHandler) && isset($osrsHandler->resultFullRaw)*/) {
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && isset($osrsHandler->resultFullRaw['response_text']))
 					$error .= '<br>'.get_domain_error_text($osrsHandler);
 				dialog('Domain Registration Error', nl2br($error), FALSE, '{width: "auto"}');
