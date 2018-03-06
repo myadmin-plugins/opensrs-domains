@@ -563,6 +563,8 @@ Interserver, Inc.<br>
 				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
 				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
 				myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
+				$serviceClass->setStatus('pending');
+				myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
 				return false;
 			}
 			domain_welcome_email($id);
