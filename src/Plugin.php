@@ -140,7 +140,7 @@ class Plugin {
 		function_requirements('class.OpenSRS');
 		$settings = get_module_settings('domains');
 		$db = get_module_db('domains');
-		$id = (int)$id;
+		$id = (int) $id;
 		$serviceTypes = run_event('get_service_types', FALSE, 'domains');
 		$renew = false;
 		$class = '\\MyAdmin\\Orm\\'.get_orm_class_from_table($settings['TABLE']);
@@ -170,7 +170,7 @@ class Plugin {
 				$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 				if ($response !== false && isset($response['attributes']['expiredate'])) {
 					$parts = explode('-', $response['attributes']['expiredate']);
-					$expireyear =  $parts[0];
+					$expireyear = $parts[0];
 					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
 					myadmin_log('domains', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
 					/*if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
@@ -236,7 +236,7 @@ class Plugin {
 				}
 				$phone = $serviceClass->getPhone();
 				if (mb_substr($phone, 0, 1) != '+') {
-					$db->query("select * from country_t where iso2='" . $db->real_escape($serviceClass->getCountry()) . "' or iso3='" . $db->real_escape($serviceClass->getCountry()) . "'", __LINE__, __FILE__);
+					$db->query("select * from country_t where iso2='".$db->real_escape($serviceClass->getCountry())."' or iso3='".$db->real_escape($serviceClass->getCountry())."'", __LINE__, __FILE__);
 					if ($db->num_rows() > 0) {
 						$db->next_record(MYSQL_ASSOC);
 						$code = $db->Record['calling_code'];
@@ -249,7 +249,7 @@ class Plugin {
 				$dns3 = 'cdns3.interserver.net';
 				if (isset($GLOBALS['modules']['webhosting'])) {
 					$db2 = get_module_db('webhosting');
-					$db2->query("select websites.*, website_name, website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='" . $db2->real_escape($serviceClass->getHostname()) . "'", __LINE__, __FILE__);
+					$db2->query("select websites.*, website_name, website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
 					if ($db2->num_rows() > 0) {
 						$db2->next_record(MYSQL_ASSOC);
 						if (preg_match("/^webhosting(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches) && $matches['id'] >= 2003) {
@@ -262,8 +262,8 @@ class Plugin {
 						$dns3 = '';
 					}
 				}
-				$dns_array = [$dns1,$dns2,$dns3];
-				$dns_string = $dns1.','.$dns2 . ($dns3 != '' ?  ','.$dns3 : '');
+				$dns_array = [$dns1, $dns2, $dns3];
+				$dns_string = $dns1.','.$dns2.($dns3 != '' ? ','.$dns3 : '');
 				$country = convert_country_iso2($serviceClass->getCountry());
 				$callArray = [
 					'func' => 'provSWregister',
@@ -434,8 +434,8 @@ class Plugin {
 					$callArray['data']['rant_no'] = (isset($extra['rant_no']) ? $extra['rant_no'] : '');
 				}
 				if ($serviceTld == '.tel') {
-					$callArray['data']['custom_nameservers']=0;
-					$callArray['data']['custom_nameservers']=0;
+					$callArray['data']['custom_nameservers'] = 0;
+					$callArray['data']['custom_nameservers'] = 0;
 				}
 				if ($serviceTld == '.pro') {
 					$callArray['professional_data'] = ['profession' => 'Administrator'];
@@ -536,7 +536,7 @@ class Plugin {
 					}
 				}
 			}
-			$query = "update {$settings['TABLE']} set domain_extra='" . $db->real_escape(base64_encode(gzcompress(myadmin_stringify($extra)))) . "' where domain_id=$id";
+			$query = "update {$settings['TABLE']} set domain_extra='".$db->real_escape(base64_encode(gzcompress(myadmin_stringify($extra))))."' where domain_id=$id";
 			$db->query($query, __LINE__, __FILE__);
 			if ((isset($error) && $error !== false) /*&& isset($osrsHandler) && isset($osrsHandler->resultFullRaw)*/) {
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && isset($osrsHandler->resultFullRaw['response_text']))
@@ -554,7 +554,7 @@ The Error message from the registrar was:<br>
 <br>
 To fix this and help ensure your domain registration goes through smoothly please<br>
 update the appropriate info at this url:<br>
-<a href="https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php',
+<a href="https://'.DOMAIN.URLDIR.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.URLDIR.$GLOBALS['tf']->link('/index.php',
 				'choice=none.view_domain&id='.$id).'</a><br>
 and then contact support@interserver.net to have them try the domain registration again.<br>
 <br>

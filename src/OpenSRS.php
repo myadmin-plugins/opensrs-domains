@@ -749,7 +749,7 @@ class OpenSRS {
 			$header .= 'Content-Length: '.mb_strlen($xml)."\r\n\r\n";
 			$fp = fsockopen("ssl://$host", $port, $errno, $errstr, 30);
 			if (!$fp) {
-				myadmin_log('domains', 'info', 'OpenSRS::' .__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+				myadmin_log('domains', 'info', 'OpenSRS::'.__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 				$endPages = TRUE;
 			} else {
 				// post the data to the server
