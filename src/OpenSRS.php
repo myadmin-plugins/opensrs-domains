@@ -277,7 +277,7 @@ class OpenSRS {
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
 		]]);
-		$this->osrsHandlerAllInfo = $this->request($callstring);
+		$this->osrsHandlerAllInfo = self::request($callstring);
 		$callstring = json_encode([
 			'func' => 'lookupGetDomain',
 			'attributes' => [
@@ -291,7 +291,7 @@ class OpenSRS {
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
 		]]);
-		$this->osrsHandlerWhoisPrivacy = $this->request($callstring);
+		$this->osrsHandlerWhoisPrivacy = self::request($callstring);
 		$this->whoisPrivacy = $this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']['state'];
 		$callstring = json_encode([
 			'func' => 'lookupGetDomain',
@@ -306,7 +306,7 @@ class OpenSRS {
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
 		]]);
-		$this->osrsHandlerStatus = $this->request($callstring);
+		$this->osrsHandlerStatus = self::request($callstring);
 		$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
 		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
 		$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
@@ -327,7 +327,7 @@ class OpenSRS {
 				'reg_password' => $password,
 				'domain' => $domain
 		]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
 		if (!isset($osrsHandler->resultFullRaw['attributes'])) {
 			myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
@@ -349,7 +349,7 @@ class OpenSRS {
 				'cookie' => $cookie,
 				'name' => 'all'
 		]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
 		if (isset($osrsHandler->resultFullRaw['nameserver_list'])) {
 			return $osrsHandler->resultFullRaw['nameserver_list'];
@@ -375,7 +375,7 @@ class OpenSRS {
 				'ipaddress' => $ip
 		]]);
 		//echo "Call String: $callstring\n<br>";
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && $osrsHandler->resultFullRaw['is_success'] == 1) {
 			// echo $osrsHandler->resultFullRaw['response_text'].'<br>';
 			return TRUE;
@@ -404,7 +404,7 @@ class OpenSRS {
 				'ipaddress' => $ip
 		]]);
 		//echo "Call String: $callstring\n<br>";
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'nsDelete', $callstring, $osrsHandler);
 		myadmin_log('domains', 'info', 'Delete NS Response'.json_encode($osrsHandler), __LINE__, __FILE__);
 		if ($osrsHandler->resultFullRaw['is_success'] == 1) {
@@ -445,7 +445,7 @@ class OpenSRS {
 				'check_status' => $checkStatus,
 				'get_request_address' => $getRequestAddress
 		]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		return $osrsHandler->resultFullRaw;
 	}
 
@@ -474,7 +474,7 @@ class OpenSRS {
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
 		]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		return $osrsHandler->resultFullRaw;
 	}
 
@@ -542,7 +542,7 @@ class OpenSRS {
 				//'tlds' => array_keys(get_available_domain_tlds_by_tld()),
 				//'tlds' => array(get_domain_tld($domain)),
 		]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		//myadmin_log('domains', 'info', json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
 		$resultValues = array_values($osrsHandler->resultFullRaw);
 		foreach ($resultValues as $data)
@@ -579,7 +579,7 @@ class OpenSRS {
 					'selected' => implode(';', array_keys($tlds)),
 					'alldomains' => implode(';', array_keys($tlds))
 			]]);
-		$osrsHandler = $this->request($callstring);
+		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 			$resultTypes = array_keys($osrsHandler->resultFullRaw['attributes']);
 			foreach ($resultTypes as $resultType)
@@ -622,7 +622,7 @@ class OpenSRS {
 	 */
 	public static function lock($domain, $lock = TRUE) {
 		$lockStatusUpdate = $lock === TRUE ? 1 : 0;
-		$xmlresponseobj = $this->xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
+		$xmlresponseobj = self::xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
 					<item key="lock_state">'.$lockStatusUpdate.'</item>
 `								<item key="data">status</item>');
 		if (!$fp) {
@@ -653,7 +653,7 @@ class OpenSRS {
 	 */
 	public static function whoisPrivacy($domain, $enabled) {
 		$privacyStatusUpdate = $enabled == TRUE ? 'enable' : 'disable';
-		$xmlresponseobj = $this->xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
+		$xmlresponseobj = self::xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
 						<item key="state">'.$privacyStatusUpdate.'</item>
 						<item key="data">whois_privacy_state</item>');
 		if ($xmlresponseobj !== FALSE) {
@@ -687,7 +687,7 @@ class OpenSRS {
 		$domains = [];
 		while ($endPages == FALSE) {
 			$page++;
-			$xmlresponseobj = $this->xmlRequest('get_domains_by_expiredate', 'domain', '<item key="limit">'.$limit.'</item>
+			$xmlresponseobj = self::xmlRequest('get_domains_by_expiredate', 'domain', '<item key="limit">'.$limit.'</item>
 					<item key="exp_from">'.$fromDate.'</item>
 					<item key="exp_to">'.$toDate.'</item>
 					<item key="page">'.$page.'</item>');
@@ -730,7 +730,7 @@ class OpenSRS {
 	 * @return array returns true if domain cancelled else false
 	 */
 	public static function redeemDomain($domain) {
-		$xmlresponseobj = $this->xmlRequest('REDEEM', 'DOMAIN', '<item key="domain">'.$domain.'</item>');
+		$xmlresponseobj = self::xmlRequest('REDEEM', 'DOMAIN', '<item key="domain">'.$domain.'</item>');
 		if (!$fp) {
 			myadmin_log('domains', 'error', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
@@ -754,7 +754,7 @@ class OpenSRS {
 	}
 
 	public static function ackEvent($event_id) {
-		$xmlresponseobj = $this->xmlRequest('EVENT', 'ACK', '<item key="event_id">'.$event_id.'</item>');
+		$xmlresponseobj = self::xmlRequest('EVENT', 'ACK', '<item key="event_id">'.$event_id.'</item>');
 		if (!$fp) {
 			myadmin_log('domains', 'error', "OpenSRS::ackEvent({$limit}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
 		} else {
@@ -786,7 +786,7 @@ class OpenSRS {
 	 * @return array returns some crap
 	 */
 	public static function pollEvent($limit = 1) {
-		$xmlresponseobj = $this->xmlRequest('EVENT', 'POLL', '<item key="limit">'.$limit.'</item>');
+		$xmlresponseobj = self::xmlRequest('EVENT', 'POLL', '<item key="limit">'.$limit.'</item>');
 		if ($xmlresponseobj !== FALSE) {
 			function_requirements('xml2array');
 			$array = xml2array($xmlresponseobj, 1, 'attribute');
