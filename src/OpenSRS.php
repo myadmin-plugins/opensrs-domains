@@ -504,7 +504,7 @@ class OpenSRS {
 			$callarray['attributes']['selected'] = implode(';', get_available_domain_tlds());
 		$callstring = json_encode($callarray);
 		$osrsHandler = self::request($callstring);
-		return $osrsHandler->resultFullRaw;
+		return $osrsHandler === FALSE ? FALSE : $osrsHandler->resultFullRaw;
 	}
 
 	/**
