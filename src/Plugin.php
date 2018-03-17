@@ -369,8 +369,6 @@ class Plugin {
 									$extra_info['place_of_birth'] = $extra['country_of_birth'];
 									$extra_info['postal_code_of_birth'] = $extra['country_of_birth'];
 								}
-							} else {
-
 							}
 							$callArray['data']['tld_data']['registrant_extra_info'] = $extra_info;
 						}
