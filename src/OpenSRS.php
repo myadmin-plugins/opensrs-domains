@@ -59,6 +59,11 @@ class OpenSRS {
 		$this->loadDomainInfo();
 	}
 
+	/**
+	 * returns an array of various events we can receive with descriptions and logically hierarchically sorted
+	 *
+	 * @return array
+	 */
 	public static function getEventTypes() {
 		return [
 			'types' => [
@@ -209,8 +214,11 @@ class OpenSRS {
 				<item key="action">'.$action.'</item>
 				<item key="object">'.$object.'</item>
 				<item key="attributes">
-					<dt_assoc>
-						'.$options.'
+					<dt_assoc>';
+		foreach ($options as $key => $value)
+			$xml .= PHP_EOL.'
+						<item key="'.$key.'">'.$value.'</item>';
+		$xml .= '
 					</dt_assoc>
 				</item>
 			</dt_assoc>
@@ -233,29 +241,32 @@ class OpenSRS {
 			myadmin_log(self::$module, 'debug', 'OpenSRS:'.$action.':'.$object.' Failed - Unknown Error '.$errno.' '.$errstr, __LINE__, __FILE__);
 			return FALSE;
 		} else {
-			// post the data to the server
+			$response = ['xml_str' => '','lines' => '','xml_obj' => '','xml_array' => ''];
 			fputs($fp, $header.$xml);
 			$i = 0;
-			$xmlresponseobj = NULL;
-			$lines = [];
+			$response['xml_str'] = NULL;
+			$response['lines'] = [];
 			while (!feof($fp)) {
 				$res = fgets($fp);
-				$lines[] = $res;
+				$response['lines'][] = $res;
 				if ($i >= 6)
-					$xmlresponseobj .= $res;
+					$response['xml_str'] .= $res;
 				$i++;
 			}
 			fclose($fp);
 			libxml_use_internal_errors(TRUE);
-			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
-			$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
-			if (!$obj1) {
+			$response['xml_obj'] = simplexml_load_string($response['xml_str']); // Parse XML
+			if (!$response['xml_obj']) {
 				$errors = libxml_get_errors();
 				foreach ($errors as $error)
 					myadmin_log('domains', 'error', 'This Line `'.$xml[$error->line - 1].'` gave a '.$levels[$error->level].' #'.$error->code.' `'.$error->message.'` at Line '.$error->line.' Column '.$error->column.' File '.$error->file, __LINE__, __FILE__);
 				libxml_clear_errors();
 				return FALSE;
+			} else {
+				//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
+				$response['xml_array'] = json_decode(json_encode($response['xml_obj']), TRUE); // Convert to array
 			}
+			return $response;
 		}
 	}
 
@@ -351,11 +362,7 @@ class OpenSRS {
 		]]);
 		$osrsHandler = self::request($callstring);
 		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
-		if (isset($osrsHandler->resultFullRaw['nameserver_list'])) {
-			return $osrsHandler->resultFullRaw['nameserver_list'];
-		} else {
-			return FALSE;
-		}
+		return isset($osrsHandler->resultFullRaw['nameserver_list']) ? $osrsHandler->resultFullRaw['nameserver_list'] : FALSE;
 	}
 
 	/**
@@ -622,25 +629,9 @@ class OpenSRS {
 	 */
 	public static function lock($domain, $lock = TRUE) {
 		$lockStatusUpdate = $lock === TRUE ? 1 : 0;
-		$xmlresponseobj = self::xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
-					<item key="lock_state">'.$lockStatusUpdate.'</item>
-`								<item key="data">status</item>');
-		if (!$fp) {
-			myadmin_log(self::$module, 'debug', 'OpenSRS Failed - Unknown Error '.$errno.' '.$errstr, __LINE__, __FILE__);
+		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'lock_state'=>$lockStatusUpdate,'data'=>'status']);
+		if ($response === FALSE || !$response['line'][20])
 			return FALSE;
-		} else {
-			// post the data to the server
-			fputs($fp, $header.$xml);
-			while (!feof($fp)) {
-				$res = fgets($fp, 1024);
-				$line[] = $res;
-			}
-			fclose($fp);
-			if (!$line[20]) {
-				myadmin_log(self::$module, 'debug', 'OpenSRS Failed - '.$line[17], __LINE__, __FILE__);
-				return FALSE;
-			}
-		}
 		return TRUE;
 	}
 
@@ -653,17 +644,11 @@ class OpenSRS {
 	 */
 	public static function whoisPrivacy($domain, $enabled) {
 		$privacyStatusUpdate = $enabled == TRUE ? 'enable' : 'disable';
-		$xmlresponseobj = self::xmlRequest('modify', 'domain', '<item key="domain_name">'.$domain.'</item>
-						<item key="state">'.$privacyStatusUpdate.'</item>
-						<item key="data">whois_privacy_state</item>');
-		if ($xmlresponseobj !== FALSE) {
-			if ($line[20])
-				$result2 = $line[17];
-			else
-				$result2 = $line[17];
-			$result2 = trim(strip_tags($result2));
-			myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
-		}
+		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'state'=>$privacyStatusUpdate,'data'=>'whois_privacy_state']);
+		if ($response === FALSE)
+			return FALSE;
+		$result2 = trim(strip_tags($response['line'][17]));
+		myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
 		return TRUE;
 	}
 
@@ -687,32 +672,16 @@ class OpenSRS {
 		$domains = [];
 		while ($endPages == FALSE) {
 			$page++;
-			$xmlresponseobj = self::xmlRequest('get_domains_by_expiredate', 'domain', '<item key="limit">'.$limit.'</item>
-					<item key="exp_from">'.$fromDate.'</item>
-					<item key="exp_to">'.$toDate.'</item>
-					<item key="page">'.$page.'</item>');
-			if (!$fp) {
-				myadmin_log('domains', 'info', 'OpenSRS::'.__FUNCTION__." returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
+			$response = self::xmlRequest('get_domains_by_expiredate', 'domain', ['limit'=>$limit,'exp_from'=>$fromDate,'exp_to'=>$toDate,'page'=>$page]);
+			if ($response === FALSE)
 				$endPages = TRUE;
-			} else {
-				fputs($fp, $header.$xml);
-				$i = 0;
-				$xmlresponseobj = NULL;
-				while (!feof($fp)) {
-					$res = fgets($fp, 1024);
-					if ($i >= 6)
-						$xmlresponseobj .= $res;
-					$i++;
-				}
-				fclose($fp);
-				$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
-				$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
-				if (!isset($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
-					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($array1), __LINE__, __FILE__);
+			else {
+				if (!isset($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
+					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($response['xml_array']), __LINE__, __FILE__);
 					$endPages = TRUE;
 				} else {
-					$domainArray = $array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
-					$domainValues = array_values($array1['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']);
+					$domainArray = $response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
+					$domainValues = array_values($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']);
 					foreach ($domainValues as $domainData)
 						$domains[$domainData['dt_assoc']['item'][1]] = $domainData['dt_assoc']['item'][2];
 					if (sizeof($domainArray) < $limit)
@@ -730,51 +699,23 @@ class OpenSRS {
 	 * @return array returns true if domain cancelled else false
 	 */
 	public static function redeemDomain($domain) {
-		$xmlresponseobj = self::xmlRequest('REDEEM', 'DOMAIN', '<item key="domain">'.$domain.'</item>');
-		if (!$fp) {
-			myadmin_log('domains', 'error', "OpenSRS::redeemDomain({$domain}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
-		} else {
-			// post the data to the server
-			fputs($fp, $header.$xml);
-			$i = 0;
-			$xmlresponseobj = NULL;
-			while (!feof($fp)) {
-				$res = fgets($fp);
-				if ($i >= 6)
-					$xmlresponseobj .= $res;
-				$i++;
-			}
-			fclose($fp);
-			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
-			$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
-			$resultArray = $array1['body']['data_block']['dt_assoc'];
-			myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
-			return $resultArray;
-		}
+		$response = self::xmlRequest('REDEEM', 'DOMAIN', ['domain'=>$domain]);
+		if ($response === FALSE)
+			return FALSE;
+		$resultArray = $response['xml_array']['body']['data_block']['dt_assoc'];
+		myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
+		return $resultArray;
 	}
 
 	public static function ackEvent($event_id) {
-		$xmlresponseobj = self::xmlRequest('EVENT', 'ACK', '<item key="event_id">'.$event_id.'</item>');
-		if (!$fp) {
-			myadmin_log('domains', 'error', "OpenSRS::ackEvent({$limit}) returned error {$errno} {$errstr} on fsockopen", __LINE__, __FILE__);
-		} else {
-			fputs($fp, $header.$xml);
-			$i = 0;
-			$xmlresponseobj = NULL;
-			while (!feof($fp)) {
-				$res = fgets($fp);
-				if ($i >= 6)
-					$xmlresponseobj .= $res;
-				$i++;
-			}
-			fclose($fp);
-			function_requirements('xml2array');
-			$array = xml2array($xmlresponseobj, 1, 'attribute');
-			$array = $array['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
-			$resultArray = self::response_to_array($array);
-			myadmin_log('domains', 'info', "OpenSRS::ackEvent({$event_id}) returned ".json_encode($resultArray), __LINE__, __FILE__);
-			return $resultArray['is_success'] == '1';
-		}
+		$response = self::xmlRequest('EVENT', 'ACK', ['event_id'=>$event_id]);
+		if ($response === FALSE)
+			return FALSE;
+		//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
+		$response['xml_array'] = $response['xml_array']['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
+		$resultArray = self::response_to_array($response['xml_array']);
+		myadmin_log('domains', 'info', "OpenSRS::ackEvent({$event_id}) returned ".json_encode($resultArray), __LINE__, __FILE__);
+		return $resultArray['is_success'] == '1';
 	}
 
 
@@ -786,12 +727,12 @@ class OpenSRS {
 	 * @return array returns some crap
 	 */
 	public static function pollEvent($limit = 1) {
-		$xmlresponseobj = self::xmlRequest('EVENT', 'POLL', '<item key="limit">'.$limit.'</item>');
-		if ($xmlresponseobj !== FALSE) {
-			function_requirements('xml2array');
-			$array = xml2array($xmlresponseobj, 1, 'attribute');
-			$array = $array['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
-			$resultArray = self::response_to_array($array);
+		$response = self::xmlRequest('EVENT', 'POLL', ['limit'=>$limit]);
+		if ($response['xml_str'] !== FALSE) {
+			//function_requirements('xml2array');
+			//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
+			$response['xml_array'] = $response['xml_array']['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
+			$resultArray = self::response_to_array($response['xml_array']);
 			myadmin_log('domains', 'info', "OpenSRS::pollEvent({$limit}) returned ".json_encode($resultArray), __LINE__, __FILE__);
 			if ($resultArray['is_success'] == '1') {
 				if (self::ackEvent($resultArray['attributes']['events']['event_id'])) {
