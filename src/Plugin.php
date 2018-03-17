@@ -142,7 +142,7 @@ class Plugin {
 		$db = get_module_db('domains');
 		$id = (int) $id;
 		$serviceTypes = run_event('get_service_types', FALSE, 'domains');
-		$renew = false;
+		$renew = FALSE;
 		$class = '\\MyAdmin\\Orm\\'.get_orm_class_from_table($settings['TABLE']);
 		/** @var \MyAdmin\Orm\Product $class **/
 		$serviceClass = new $class();
@@ -152,7 +152,7 @@ class Plugin {
 			if ($data['status'] == 'locked') {
 				dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
 				myadmin_log('domains', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
-				return false;
+				return FALSE;
 			}
 			$username = $serviceClass->getUsername();
 			if (trim($username) == '') {
@@ -168,7 +168,7 @@ class Plugin {
 			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
 			if ($serviceClass->getStatus() == 'active') {
 				$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
-				if ($response !== false && isset($response['attributes']['expiredate'])) {
+				if ($response !== FALSE && isset($response['attributes']['expiredate'])) {
 					$parts = explode('-', $response['attributes']['expiredate']);
 					$expireyear = $parts[0];
 					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
@@ -177,11 +177,11 @@ class Plugin {
 						$renew = true;*/
 					$date_today = date('Y-m-d');
 					if (strtotime($expiry_full_date) >= strtotime($date_today))
-						$renew = true;
+						$renew = TRUE;
 				}
 			}
-			$error = false;
-			if ($renew === true) {
+			$error = FALSE;
+			if ($renew === TRUE) {
 				$formFormat = 'json';
 				$formFunction = 'provRenew';
 				//$callstring = "";
@@ -316,7 +316,7 @@ class Plugin {
 				if (trim($serviceClass->getFax()) != '')
 					$callArray['fax'] = $serviceClass->getFax();
 				if (in_array($serviceTld, ['.abogado', '.aero', '.asia', '.cl', '.co.hu', '.com.ar', '.com.br', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fr', '.hk', '.hu', '.it', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pro', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.uk', '.us', '.wf', '.xxx', '.yt'])) {
-					$tld_data = true;
+					$tld_data = TRUE;
 					$callArray['data']['tld_data'] = [];
 					if (in_array($serviceTld, ['.abogado', '.aero', '.cl', '.co.hu', '.com.ar', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fi.', '.fr', '.hk', '.hu', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.wf', '.yt'])) {
 						$callArray['data']['tld_data']['registrant_extra_info'] = [];
@@ -481,7 +481,7 @@ class Plugin {
 						$order_id = $osrsHandler->resultFullRaw['attributes']['id'];
 						$extra['order_id'] = $order_id;
 
-						if (!isset($error) || $error === false) {
+						if (!isset($error) || $error === FALSE) {
 							unset($osrsHandler);
 							$callArray = ['func' => 'provProcessPending', 'attributes' => ['order_id' => $order_id]];
 							$callstring = json_encode($callArray);
@@ -507,7 +507,7 @@ class Plugin {
 								}
 								$extra['provProcessPending'] = obj2array($osrsHandler->resultFullRaw);
 							}
-							if ((!isset($error) || $error === false) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
+							if ((!isset($error) || $error === FALSE) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								$callstring = '';
 								$callArray = [
 									'func' => 'nsAdvancedUpdt', 'attributes' => [
@@ -536,7 +536,7 @@ class Plugin {
 			}
 			$query = "update {$settings['TABLE']} set domain_extra='".$db->real_escape(myadmin_stringify($extra))."' where domain_id=$id";
 			$db->query($query, __LINE__, __FILE__);
-			if ((isset($error) && $error !== false) /*&& isset($osrsHandler) && isset($osrsHandler->resultFullRaw)*/) {
+			if ((isset($error) && $error !== FALSE) /*&& isset($osrsHandler) && isset($osrsHandler->resultFullRaw)*/) {
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && isset($osrsHandler->resultFullRaw['response_text']))
 					$error .= '<br>'.get_domain_error_text($osrsHandler);
 				dialog('Domain Registration Error', nl2br($error), FALSE, '{width: "auto"}');
@@ -563,12 +563,12 @@ Interserver, Inc.<br>
 				myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
 				$serviceClass->setStatus('pending');
 				myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
-				return false;
+				return FALSE;
 			}
 			domain_welcome_email($id);
-			return true;
+			return TRUE;
 		}
-		return false;
+		return FALSE;
 	}
 
 }

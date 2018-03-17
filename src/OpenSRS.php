@@ -246,7 +246,7 @@ class OpenSRS {
 				$i++;
 			}
 			fclose($fp);
-			libxml_use_internal_errors(true);
+			libxml_use_internal_errors(TRUE);
 			$obj1 = simplexml_load_string($xmlresponseobj); // Parse XML
 			$array1 = json_decode(json_encode($obj1), TRUE); // Convert to array
 			if (!$obj1) {
@@ -254,7 +254,7 @@ class OpenSRS {
 				foreach ($errors as $error)
 					myadmin_log('domains', 'error', 'This Line `'.$xml[$error->line - 1].'` gave a '.$levels[$error->level].' #'.$error->code.' `'.$error->message.'` at Line '.$error->line.' Column '.$error->column.' File '.$error->file, __LINE__, __FILE__);
 				libxml_clear_errors();
-				return false;
+				return FALSE;
 			}
 		}
 	}
