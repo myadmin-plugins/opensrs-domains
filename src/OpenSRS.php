@@ -636,7 +636,7 @@ class OpenSRS {
 	public static function lock($domain, $lock = TRUE) {
 		$lockStatusUpdate = $lock === TRUE ? 1 : 0;
 		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'lock_state'=>$lockStatusUpdate,'data'=>'status']);
-		if ($response === FALSE || !$response['line'][20])
+		if ($response === FALSE || !$response['lines'][20])
 			return FALSE;
 		return TRUE;
 	}
@@ -653,7 +653,7 @@ class OpenSRS {
 		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'state'=>$privacyStatusUpdate,'data'=>'whois_privacy_state']);
 		if ($response === FALSE)
 			return FALSE;
-		$result2 = trim(strip_tags($response['line'][17]));
+		$result2 = trim(strip_tags($response['lines'][17]));
 		myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
 		return TRUE;
 	}
