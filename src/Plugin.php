@@ -207,7 +207,7 @@ class Plugin {
 					$error = $e->getMessage();
 					$error_message = $e->getMessage();
 					$info = $e->getInfo();
-					$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 					//add_output($error_message.':'.$info.'<br>');
 				} catch (\opensrs\Exception $e) {
@@ -469,7 +469,7 @@ class Plugin {
 					$error = $e->getMessage();
 					$error_message = $e->getMessage();
 					$info = $e->getInfo();
-					$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 					//add_output($error_message.':'.$info.'<br>');
 					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callstring, $e->getMessage().':'.$info);
@@ -501,7 +501,7 @@ class Plugin {
 								$error = $e->getMessage();
 								$error_message = $e->getMessage();
 								$info = $e->getInfo();
-								$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+								$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 								myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 								//add_output($error_message.':'.$info.'<br>');
 							} catch (\opensrs\Exception $e) {
@@ -540,7 +540,7 @@ class Plugin {
 									$error = $e->getMessage();
 									$error_message = $e->getMessage();
 									$info = $e->getInfo();
-									$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+									$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 									myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 									//add_output($error_message.':'.$info.'<br>');
 								} catch (\opensrs\Exception $e) {

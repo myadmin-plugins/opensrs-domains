@@ -184,7 +184,7 @@ class OpenSRS {
 		} catch (\opensrs\APIException $e) {
 			$error_message = $e->getMessage();
 			$info = $e->getInfo();
-			$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+			$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 			myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 			add_output($error_message.':'.$info.'<br>');
 			return FALSE;
