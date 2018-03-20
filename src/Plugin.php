@@ -151,7 +151,7 @@ class Plugin {
 			$data = $GLOBALS['tf']->accounts->read($serviceClass->getCustid());
 			if ($data['status'] == 'locked') {
 				dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
-				myadmin_log('domains', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
 				return FALSE;
 			}
 			$username = $serviceClass->getUsername();
@@ -165,14 +165,14 @@ class Plugin {
 			$serviceInfo = $serviceTypes[$serviceClass->getType()];
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
-			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
+			//myadmin_log('opensrs', 'info', json_encode($extra), __LINE__, __FILE__);
 			if ($serviceClass->getStatus() == 'active') {
 				$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 				if ($response !== FALSE && isset($response['attributes']['expiredate'])) {
 					$parts = explode('-', $response['attributes']['expiredate']);
 					$expireyear = $parts[0];
 					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
-					myadmin_log('domains', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
+					myadmin_log('opensrs', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
 					/*if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
 						$renew = true;*/
 					$date_today = date('Y-m-d');
@@ -204,15 +204,20 @@ class Plugin {
 					$request = new \opensrs\Request();
 					$osrsHandler = $request->process($formFormat, $callstring);
 				} catch (\opensrs\APIException $e) {
-					myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+					$error = $e->getMessage();
+					$error_message = $e->getMessage();
+					$info = $e->getInfo();
+					$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+					myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
+					//add_output($error_message.':'.$info.'<br>');
 				} catch (\opensrs\Exception $e) {
-					myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+					myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 				}
 				request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callstring, $osrsHandler);
 				// Print out the results
-				myadmin_log('domains', 'info', 'In: '.$callstring.'<br>', __LINE__, __FILE__);
-				myadmin_log('domains', 'info', 'Out: '.json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
-				//myadmin_log('domains', 'info', "Out: ". $osrsHandler->resultFullFormatted, __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', 'In: '.$callstring.'<br>', __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
+				//myadmin_log('opensrs', 'info', "Out: ". $osrsHandler->resultFullFormatted, __LINE__, __FILE__);
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 					$extra['order'] = obj2array($osrsHandler->resultFullRaw);
 					if ($osrsHandler->resultFullRaw['is_success'] == 1) {
@@ -322,7 +327,7 @@ class Plugin {
 						$callArray['data']['tld_data']['registrant_extra_info'] = [];
 						//.nu
 						if (in_array($serviceTld, ['.nu', '.hu', '.co.hu', '.se'])) {
-							myadmin_log('domains', 'info', 'adding registrant type', __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__);
 							if (isset($extra['registrant_type']))
 								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							else
@@ -336,7 +341,7 @@ class Plugin {
 						}
 						//.hk .ru
 						if (in_array($serviceTld, ['.hk', '.ru'])) {
-							myadmin_log('domains', 'info', 'adding registrant type', __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__);
 							if (isset($extra['registrant_type']))
 								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							else
@@ -349,14 +354,14 @@ class Plugin {
 							}
 						}
 						if (in_array($serviceTld, ['.nyc'])) {
-							myadmin_log('domains', 'info', 'adding registrant type', __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__);
 							if (isset($extra['registrant_type']))
 								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							else
 								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
 						}
 						if (in_array($serviceTld, ['.fr'])) {
-							myadmin_log('domains', 'info', 'adding registrant type', __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__);
 							$extra_info = [];
 							if (isset($extra['registrant_type']))
 								$extra_info['registrant_type'] = $extra['registrant_type'];
@@ -403,11 +408,11 @@ class Plugin {
 				if (isset($extra['transfer']) && $extra['transfer'] == 'yes') {
 					$callArray['data']['custom_nameservers'] = '0';
 					$callArray['data']['reg_type'] = 'transfer';
-					myadmin_log('domains', 'info', 'Transfer: YES', __LINE__, __FILE__);
+					myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__);
 					//if ($serviceTld == '.com.ph')
 	//						$callArray['data']['period'] = 0;
 				} else {
-					myadmin_log('domains', 'info', 'Transfer: NO', __LINE__, __FILE__);
+					myadmin_log('opensrs', 'info', 'Transfer: NO', __LINE__, __FILE__);
 				}
 				if ($serviceTld == '.eu') {
 					$callArray['data']['custom_transfer_nameservers'] = '1';
@@ -454,25 +459,29 @@ class Plugin {
 				//$callstring = json_encode($callArray, JSON_PRETTY_PRINT);
 				// Open SRS Call -> Result
 				// Print out the results
-				myadmin_log('domains', 'info', ' In: '.$callstring, __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', ' In: '.$callstring, __LINE__, __FILE__);
 				try {
 					$request = new \opensrs\Request();
 					$osrsHandler = $request->process($formFormat, $callstring);
 					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callstring, $osrsHandler);
-					myadmin_log('domains', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__);
+					myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__);
 				} catch (\opensrs\APIException $e) {
 					$error = $e->getMessage();
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callstring, $e->getMessage());
-					myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+					$error_message = $e->getMessage();
+					$info = $e->getInfo();
+					$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+					myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
+					//add_output($error_message.':'.$info.'<br>');
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callstring, $e->getMessage().':'.$info);
 				} catch (\opensrs\Exception $e) {
 					$error = $e->getMessage();
 					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callstring, $e->getMessage());
-					myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+					myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 				}
 				/*
 				$arr = obj2array($osrsHandler->resultFullRaw);
 				foreach ($arr as $key => $value) {
-				myadmin_log('domains', 'info', "Out: $key => " . json_encode($value), __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', "Out: $key => " . json_encode($value), __LINE__, __FILE__);
 				}
 				*/
 				if ((!isset($error) || $error === FALSE) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
@@ -489,13 +498,18 @@ class Plugin {
 								$request = new \opensrs\Request();
 								$osrsHandler = $request->process('json', $callstring);
 							} catch (\opensrs\APIException $e) {
-								myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+								$error = $e->getMessage();
+								$error_message = $e->getMessage();
+								$info = $e->getInfo();
+								$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+								myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
+								//add_output($error_message.':'.$info.'<br>');
 							} catch (\opensrs\Exception $e) {
-								myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+								myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 							}
 							request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callstring, $osrsHandler);
-							myadmin_log('domains', 'info', ' In: '.$callstring.'<br>', __LINE__, __FILE__);
-							myadmin_log('domains', 'info', 'Out:'.json_encode($osrsHandler), __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', ' In: '.$callstring.'<br>', __LINE__, __FILE__);
+							myadmin_log('opensrs', 'info', 'Out:'.json_encode($osrsHandler), __LINE__, __FILE__);
 							if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								if ($osrsHandler->resultFullRaw['is_success'] == 1) {
 									$order_id = $osrsHandler->resultFullRaw['attributes']['order_id'];
@@ -520,12 +534,17 @@ class Plugin {
 								try {
 									$request = new \opensrs\Request();
 									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callstring, $osrsHandler);
-									myadmin_log('domains', 'info', 'In: '.$callstring.'<br>', __LINE__, __FILE__);
-									myadmin_log('domains', 'info', 'Out: '.json_encode($request->process('json', $callstring)), __LINE__, __FILE__);
+									myadmin_log('opensrs', 'info', 'In: '.$callstring.'<br>', __LINE__, __FILE__);
+									myadmin_log('opensrs', 'info', 'Out: '.json_encode($request->process('json', $callstring)), __LINE__, __FILE__);
 								} catch (\opensrs\APIException $e) {
-									myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+									$error = $e->getMessage();
+									$error_message = $e->getMessage();
+									$info = $e->getInfo();
+									$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+									myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
+									//add_output($error_message.':'.$info.'<br>');
 								} catch (\opensrs\Exception $e) {
-									myadmin_log('domains', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+									myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
 								}
 							}
 						}
@@ -560,9 +579,9 @@ Interserver, Inc.<br>
 ';
 				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
 				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
-				myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__);
 				$serviceClass->setStatus('pending');
-				myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__);
 				return FALSE;
 			}
 			domain_welcome_email($id);

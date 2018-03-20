@@ -182,7 +182,11 @@ class OpenSRS {
 			$request = new Request();
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
-			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+			$error_message = $e->getMessage();
+			$info = $e->getInfo();
+			$info = trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error'])))));
+			myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
+			add_output($error_message.':'.$info.'<br>');
 			return FALSE;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
