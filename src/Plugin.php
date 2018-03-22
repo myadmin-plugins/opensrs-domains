@@ -267,7 +267,10 @@ class Plugin {
 						$dns3 = '';
 					}
 				}
-				$dns_array = [$dns1, $dns2, $dns3];
+				if ($dns3 != '')
+					$dns_array = [$dns1, $dns2, $dns3];
+				else
+					$dns_array = [$dns1, $dns2];
 				$dns_string = $dns1.','.$dns2.($dns3 != '' ? ','.$dns3 : '');
 				$country = convert_country_iso2($serviceClass->getCountry());
 				$callArray = [
