@@ -158,15 +158,15 @@ class OpenSRS {
 		$out = [];
 		if (isset($array['attr']))
 			$array = [$array];
-		foreach ($array as $array_item) {
-			$key = $array_item['attr']['key'];
-			if (isset($array_item['value'])) {
-				$out[$key] = $array_item['value'];
-			} elseif (isset($array_item['dt_assoc'])) {
-				$out[$key] = self::response_to_array($array_item['dt_assoc']['item']);
-			} elseif (isset($array_item['dt_array'])) {
-				//$out[$key] = self::response_to_array($array_item['dt_array']['item']['dt_assoc']['item']);
-				$out[$key] = self::response_to_array($array_item['dt_array']['item']);
+		foreach ($array as $arrayItem) {
+			$key = $arrayItem['attr']['key'];
+			if (isset($arrayItem['value'])) {
+				$out[$key] = $arrayItem['value'];
+			} elseif (isset($arrayItem['dt_assoc'])) {
+				$out[$key] = self::response_to_array($arrayItem['dt_assoc']['item']);
+			} elseif (isset($arrayItem['dt_array'])) {
+				//$out[$key] = self::response_to_array($arrayItem['dt_array']['item']['dt_assoc']['item']);
+				$out[$key] = self::response_to_array($arrayItem['dt_array']['item']);
 			}
 		}
 		return $out;
