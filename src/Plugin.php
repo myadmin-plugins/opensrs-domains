@@ -154,6 +154,17 @@ class Plugin {
 				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
 				return FALSE;
 			}
+			$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
+			$db->next_record();
+			if($db->Record['invoices_amount'] == '1.99') {
+				$db->query("SELECT * FROM websites WHERE website_hostname = '".$db2->real_escape($serviceClass->getHostname())."'");
+				$db->next_record();
+				if($db->Record['website_status'] == 'pending') {
+					dialog('Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
+					myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
+					return FALSE;
+				}
+			}
 			$username = $serviceClass->getUsername();
 			if (trim($username) == '') {
 				$username = str_replace(['-', '.'], ['', ''], strtolower($serviceClass->getHostname()));
