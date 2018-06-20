@@ -157,7 +157,7 @@ class Plugin {
 			$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
 			$db->next_record();
 			if($db->Record['invoices_amount'] == '1.99') {
-				$db->query("SELECT * FROM websites WHERE website_hostname = '".$db2->real_escape($serviceClass->getHostname())."'");
+				$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
 				$db->next_record();
 				if($db->Record['website_status'] == 'pending') {
 					dialog('Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
