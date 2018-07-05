@@ -135,7 +135,7 @@ class Plugin {
 	 * @param int $id
 	 * @return bool
 	 */
-	public static function activate_domain($id) {
+	public static function activate_domain($id, $action = 'register') {
 		page_title('Activate Domain');
 		function_requirements('class.OpenSRS');
 		$settings = get_module_settings('domains');
@@ -177,18 +177,57 @@ class Plugin {
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
 			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
-			if ($serviceClass->getStatus() == 'active') {
-				$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
-				if ($response !== false && isset($response['attributes']['expiredate'])) {
-					$parts = explode('-', $response['attributes']['expiredate']);
-					$expireyear =  $parts[0];
-					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
-					myadmin_log('domains', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
-					/*if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
-						$renew = true;*/
-					$date_today = date('Y-m-d');
-					if (strtotime($expiry_full_date) >= strtotime($date_today))
-						$renew = true;
+			if ($action == 'renew') {
+				$status_update = TRUE; $renew_failed = '';
+				if ($serviceClass->getStatus() == 'active') {
+					$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
+					if ($response !== false && isset($response['attributes']['expiredate'])) {
+						$expiry_full_date = $response['attributes']['expiredate'];
+						$parts = explode('-', $expiry_full_date);
+						$expireyear =  $parts[0];
+						myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
+						$date_today = date('Y-m-d');
+						if (strtotime($expiry_full_date) >= strtotime($date_today)) {
+							$renew = true;
+							myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
+						} else
+							$renew_failed = "Expiration date is gone!";
+					} else 
+						$renew_failed = "Domain is not found in opensrs! could not renew!";
+				} else {
+					$renew_failed = 'Domain is not active! could not renew!';
+					$status_update = FALSE;
+				}
+					
+				if ($renew_failed) {
+					myadmin_log('domains', 'error', "$renew_failed", __LINE__, __FILE__);
+					if ($status_update) {
+						$serviceClass->setStatus('pending');
+						myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
+					}
+					dialog('Domain Registration Error', nl2br($error), FALSE, '{width: "auto"}');
+					$headers = '';
+					$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
+					$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
+					$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+					$subject = 'Error Registering Domain '.$serviceClass->getHostname();
+					$email = 'There was an error registering your domain '.$serviceClass->getHostname().'<br>
+<br>
+The Error message from the registrar was:<br>
+'.nl2br($error).'<br>
+<br>
+To fix this and help ensure your domain registration goes through smoothly please<br>
+update the appropriate info at this url:<br>
+<a href="https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php',
+				'choice=none.view_domain&id='.$id).'</a><br>
+and then contact support@interserver.net to have them try the domain registration again.<br>
+<br>
+Interserver, Inc.<br>
+';
+					multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
+					//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
+					myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
+						return FALSE;
 				}
 			}
 			$error = false;
