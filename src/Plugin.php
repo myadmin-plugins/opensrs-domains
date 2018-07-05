@@ -180,7 +180,6 @@ class Plugin {
 
 			$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 			if ($response !== false && isset($response['attributes']['expiredate'])) {
-				$renew_failed = '';
 				$expiry_full_date = $response['attributes']['expiredate'];
 				$parts = explode('-', $expiry_full_date);
 				$expireyear =  $parts[0];
@@ -191,9 +190,7 @@ class Plugin {
 					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
 				} else {
 					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
-					$serviceClass->setStatus('pending');
-					myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
-					dialog('Domain Registration Error', 'Domain Expiration date is over!', FALSE, '{width: "auto"}');
+					dialog('Domain Renewal Error', 'Domain Expiration date is over!', FALSE, '{width: "auto"}');
 				}
 			}
 			$error = false;
