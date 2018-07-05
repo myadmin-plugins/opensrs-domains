@@ -177,7 +177,7 @@ class Plugin {
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
 			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
-			
+
 			$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 			if ($response !== false && isset($response['attributes']['expiredate'])) {
 				$renew_failed = '';
@@ -189,37 +189,12 @@ class Plugin {
 				if (strtotime($expiry_full_date) >= strtotime($date_today)) {
 					$renew = true;
 					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
-				} else
-					$renew_failed = "Expiration date is gone!";
-			} else 
-				$renew_failed = "Domain is not found in opensrs! could not renew!";	
-			if ($renew_failed) {
-				myadmin_log('domains', 'error', "$renew_failed", __LINE__, __FILE__);
-				$serviceClass->setStatus('pending');
-				myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
-				dialog('Domain Registration Error', nl2br($error), FALSE, '{width: "auto"}');
-				$headers = '';
-				$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-				$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
-				$subject = 'Error Registering Domain '.$serviceClass->getHostname();
-				$email = 'There was an error registering your domain '.$serviceClass->getHostname().'<br>
-<br>
-The Error message from the registrar was:<br>
-'.nl2br($error).'<br>
-<br>
-To fix this and help ensure your domain registration goes through smoothly please<br>
-update the appropriate info at this url:<br>
-<a href="https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN . URLDIR . $GLOBALS['tf']->link('/index.php',
-			'choice=none.view_domain&id='.$id).'</a><br>
-and then contact support@interserver.net to have them try the domain registration again.<br>
-<br>
-Interserver, Inc.<br>
-';
-				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
-				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
-				myadmin_log('domains', 'info', $subject, __LINE__, __FILE__);
-				return FALSE;
+				} else {
+					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
+					$serviceClass->setStatus('pending');
+					myadmin_log('domains', 'info', 'Status changed to pending.', __LINE__, __FILE__);
+					dialog('Domain Registration Error', 'Domain Expiration date is over!', FALSE, '{width: "auto"}');
+				}
 			}
 			$error = false;
 			if ($renew === true) {
