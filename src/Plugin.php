@@ -176,19 +176,21 @@ class Plugin {
 			$serviceInfo = $serviceTypes[$serviceClass->getType()];
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
-			//myadmin_log('opensrs', 'info', json_encode($extra), __LINE__, __FILE__);
-			if ($serviceClass->getStatus() == 'active') {
-				$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
-				if ($response !== FALSE && isset($response['attributes']['expiredate'])) {
-					$parts = explode('-', $response['attributes']['expiredate']);
-					$expireyear = $parts[0];
-					$expiry_full_date = $parts[0].'-'.$parts[1].'-'.$parts[2];
-					myadmin_log('opensrs', 'info', "got expire year {$expireyear}", __LINE__, __FILE__);
-					/*if (mb_strlen($expireyear) == 4 && $expireyear >= date('Y'))
-						$renew = true;*/
-					$date_today = date('Y-m-d');
-					if (strtotime($expiry_full_date) >= strtotime($date_today))
-						$renew = TRUE;
+			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
+
+			$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
+			if ($response !== false && isset($response['attributes']['expiredate'])) {
+				$expiry_full_date = $response['attributes']['expiredate'];
+				$parts = explode('-', $expiry_full_date);
+				$expireyear =  $parts[0];
+				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
+				$date_today = date('Y-m-d');
+				if (strtotime($expiry_full_date) >= strtotime($date_today)) {
+					$renew = true;
+					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
+				} else {
+					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
+					dialog('Domain Renewal Error', 'Domain Expiration date is over!', FALSE, '{width: "auto"}');
 				}
 			}
 			$error = FALSE;
