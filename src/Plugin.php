@@ -574,9 +574,9 @@ class Plugin {
 					$error .= '<br>'.get_domain_error_text($osrsHandler);
 				dialog('Domain Registration Error', nl2br($error), FALSE, '{width: "auto"}');
 				$headers = '';
-				$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-				$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+				$headers .= 'MIME-Version: 1.0'.PHP_EOL;
+				$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
+				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 				$subject = 'Error Registering Domain '.$serviceClass->getHostname();
 				$email = 'There was an error registering your domain '.$serviceClass->getHostname().'<br>
 <br>
