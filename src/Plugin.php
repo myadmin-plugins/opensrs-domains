@@ -598,7 +598,7 @@ Interserver, Inc.<br>
 				myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__);
 				return FALSE;
 			}
-			domain_welcome_email($id);
+				domain_welcome_email($id, $renew);
 			return TRUE;
 		}
 		return FALSE;
