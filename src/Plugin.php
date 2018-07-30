@@ -184,7 +184,7 @@ class Plugin {
 				$parts = explode('-', $expiry_full_date);
 				$expireyear =  $parts[0];
 				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
-				$date_today = date('Y-m-d');
+				$date_today = date('Y-m-d H:i:s');
 				if (strtotime($expiry_full_date) >= strtotime($date_today)) {
 					$renew = true;
 					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
