@@ -13,7 +13,7 @@ build:
     dependencies:
         override:
             - composer self-update
-            - composer update --with-dependencies -v -o
+            - composer install --no-interaction --dev --prefer-dist --ansi
     tests:
         override:
             #- jshint-run $(ls public_html/js/*.js)
