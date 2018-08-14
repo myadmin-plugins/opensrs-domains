@@ -186,7 +186,7 @@ class Plugin {
 				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
 				$db->query("SELECT * FROM tld_info WHERE tld_tld = '$serviceTld'");
 				if ($db->num_rows() > 0) {
-					$db->next_record(MYSQL_ASSOC);
+					$db->next_record();
 					$tld_info = $db->Record;
 					$d_remains = intval($tld_info['tld_grace_period']) + intval($tld_info['tld_redemption_period']);
 					$e_date = date('Y-m-d', strtotime($expiry_full_date));
