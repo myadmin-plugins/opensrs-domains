@@ -184,10 +184,29 @@ class Plugin {
 				$parts = explode('-', $expiry_full_date);
 				$expireyear =  $parts[0];
 				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
+				$db->query("SELECT * FROM tld_info WHERE tld_tld = '$serviceTld'");
+				if ($db->num_rows() > 0) {
+					$db->next_record();
+					$tld_info = $db->Record;
+					$d_remains = intval($tld_info['tld_grace_period']) + intval($tld_info['tld_redemption_period']);
+					$e_date = date('Y-m-d', strtotime($expiry_full_date));
+					$redempt_date = date('Y-m-d', strtotime($e_date.' +'.$d_remains.' days'));
+					myadmin_log('domains', 'info', "Grace Period - ".intval($tld_info['tld_grace_period']), __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Redemption Period - ".intval($tld_info['tld_redemption_period']), __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Final date for renewal - {$redempt_date}", __LINE__, __FILE__);
+				} else {
+					$redempt_date = date('Y-m-d', strtotime($expiry_full_date));
+					myadmin_log('domains', 'info', "TLD record not found - {$serviceTld}", __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Setting Final date for renewal as expiration date - {$redempt_date}", __LINE__, __FILE__);
+				}
 				$date_today = date('Y-m-d H:i:s');
+				$date_only_today = date('Y-m-d');
 				if (strtotime($expiry_full_date) >= strtotime($date_today)) {
 					$renew = true;
 					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
+				} elseif (strtotime($redempt_date) >= strtotime($date_only_today)) {
+					$renew = true;
+					myadmin_log('domains', 'info', "Domain Renewal process started based on redemption date.", __LINE__, __FILE__);
 				} else {
 					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
 					dialog('Domain Renewal Error', 'Domain Expiration date is over!', FALSE, '{width: "auto"}');
