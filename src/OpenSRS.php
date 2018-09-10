@@ -17,7 +17,8 @@ use opensrs\Request;
  * OpenSRS Domain Class
  * @access public
  */
-class OpenSRS {
+class OpenSRS
+{
 	public $id;
 	public $cookie;
 	public $osrsHandlerAllInfo;
@@ -42,17 +43,20 @@ class OpenSRS {
 	 * @internal param string $password the API password
 	 * @internal param bool $testing optional (defaults to false) testing
 	 */
-	public function __construct($id = FALSE) {
+	public function __construct($id = false)
+	{
 		$this->settings = get_module_settings($this->module);
-		if ($id != FALSE)
+		if ($id != false) {
 			$this->id = (int) $id;
-		elseif (isset($GLOBALS['tf']->variables->request['id']))
+		} elseif (isset($GLOBALS['tf']->variables->request['id'])) {
 			$this->id = (int) $GLOBALS['tf']->variables->request['id'];
-		else
+		} else {
 			return;
+		}
 		$this->serviceInfo = get_service($this->id, $this->module);
-		if ($this->serviceInfo === FALSE)
+		if ($this->serviceInfo === false) {
 			return;
+		}
 		$this->serviceExtra = run_event('parse_service_extra', $this->serviceInfo[$this->settings['PREFIX'].'_extra'], $this->module);
 		$this->serviceAddons = get_service_addons($this->id, $this->module);
 		$this->cookie = $this->getCookieRaw($this->serviceInfo['domain_username'], $this->serviceInfo['domain_password'], $this->serviceInfo['domain_hostname']);
@@ -64,7 +68,8 @@ class OpenSRS {
 	 *
 	 * @return array
 	 */
-	public static function getEventTypes() {
+	public static function getEventTypes()
+	{
 		return [
 			'types' => [
 				'domain' => [
@@ -154,10 +159,12 @@ class OpenSRS {
 		];
 	}
 
-	public static function response_to_array($array) {
+	public static function response_to_array($array)
+	{
 		$out = [];
-		if (isset($array['attr']))
+		if (isset($array['attr'])) {
 			$array = [$array];
+		}
 		foreach ($array as $arrayItem) {
 			$key = $arrayItem['attr']['key'];
 			if (isset($arrayItem['value'])) {
@@ -177,7 +184,8 @@ class OpenSRS {
 	 *
 	 * @param mixed $callstring
 	 */
-	public static function request($callstring) {
+	public static function request($callstring)
+	{
 		try {
 			$request = new Request();
 			$osrsHandler = $request->process('json', $callstring);
@@ -187,10 +195,10 @@ class OpenSRS {
 			$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 			myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
 			add_output($error_message.':'.$info.'<br>');
-			return FALSE;
+			return false;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		}
 		return $osrsHandler;
 	}
@@ -202,7 +210,8 @@ class OpenSRS {
 	 * @param string $object
 	 * @param string $options
 	 */
-	public static function xmlRequest($action, $object, $options) {
+	public static function xmlRequest($action, $object, $options)
+	{
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
 		$xml = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
@@ -219,9 +228,10 @@ class OpenSRS {
 				<item key="object">'.$object.'</item>
 				<item key="attributes">
 					<dt_assoc>';
-		foreach ($options as $key => $value)
+		foreach ($options as $key => $value) {
 			$xml .= PHP_EOL.'
 						<item key="'.$key.'">'.$value.'</item>';
+		}
 		$xml .= '
 					</dt_assoc>
 				</item>
@@ -243,32 +253,34 @@ class OpenSRS {
 		$fp = fsockopen('ssl://'.$host, $port, $errno, $errstr, 30);
 		if (!$fp) {
 			myadmin_log(self::$module, 'debug', 'OpenSRS:'.$action.':'.$object.' Failed - Unknown Error '.$errno.' '.$errstr, __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		} else {
 			$response = ['xml_str' => '','lines' => '','xml_obj' => '','xml_array' => ''];
 			fputs($fp, $header.$xml);
 			$i = 0;
-			$response['xml_str'] = NULL;
+			$response['xml_str'] = null;
 			$response['lines'] = [];
 			while (!feof($fp)) {
 				$res = fgets($fp);
 				$response['lines'][] = $res;
-				if ($i >= 6)
+				if ($i >= 6) {
 					$response['xml_str'] .= $res;
+				}
 				$i++;
 			}
 			fclose($fp);
-			libxml_use_internal_errors(TRUE);
+			libxml_use_internal_errors(true);
 			$response['xml_obj'] = simplexml_load_string($response['xml_str']); // Parse XML
 			if (!$response['xml_obj']) {
 				$errors = libxml_get_errors();
-				foreach ($errors as $error)
+				foreach ($errors as $error) {
 					myadmin_log('domains', 'error', 'This Line `'.$xml[$error->line - 1].'` gave a '.$levels[$error->level].' #'.$error->code.' `'.$error->message.'` at Line '.$error->line.' Column '.$error->column.' File '.$error->file, __LINE__, __FILE__);
+				}
 				libxml_clear_errors();
-				return FALSE;
+				return false;
 			} else {
 				//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
-				$response['xml_array'] = json_decode(json_encode($response['xml_obj']), TRUE); // Convert to array
+				$response['xml_array'] = json_decode(json_encode($response['xml_obj']), true); // Convert to array
 			}
 			return $response;
 		}
@@ -278,7 +290,8 @@ class OpenSRS {
 	 * Loads all the domain information into the 2 globals and sets the locked, whois_privacy, expiry_date, and registrarStatus globals based on the output.
 	 * @return void
 	 */
-	public function loadDomainInfo() {
+	public function loadDomainInfo()
+	{
 		$callstring = json_encode([
 			'func' => 'lookupGetDomain',
 			'attributes' => [
@@ -334,7 +347,8 @@ class OpenSRS {
 	 * @param string $domain the domain name
 	 * @return false|string false if there was a problem or the string containing the cookie
 	 */
-	public static function getCookieRaw($username, $password, $domain) {
+	public static function getCookieRaw($username, $password, $domain)
+	{
 		$callstring = json_encode([
 			'func' => 'cookieSet',
 			'attributes' => [
@@ -343,10 +357,10 @@ class OpenSRS {
 				'domain' => $domain
 		]]);
 		$osrsHandler = self::request($callstring);
-		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
+		request_log('domains', false, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
 		if (!isset($osrsHandler->resultFullRaw['attributes'])) {
 			myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
-			return FALSE;
+			return false;
 		}
 		$cookie = $osrsHandler->resultFullRaw['attributes']['cookie'];
 		return $cookie;
@@ -357,7 +371,8 @@ class OpenSRS {
 	 * @param string $cookie the cookie from opensrs_get_cookie()
 	 * @return false|array false if error or an array of nameservers
 	 */
-	public static function getNameserversRaw($cookie) {
+	public static function getNameserversRaw($cookie)
+	{
 		$callstring = json_encode([
 			'func' => 'nsGet',
 			'attributes' => [
@@ -365,8 +380,8 @@ class OpenSRS {
 				'name' => 'all'
 		]]);
 		$osrsHandler = self::request($callstring);
-		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
-		return isset($osrsHandler->resultFullRaw['nameserver_list']) ? $osrsHandler->resultFullRaw['nameserver_list'] : FALSE;
+		request_log('domains', false, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
+		return isset($osrsHandler->resultFullRaw['nameserver_list']) ? $osrsHandler->resultFullRaw['nameserver_list'] : false;
 	}
 
 	/**
@@ -377,11 +392,12 @@ class OpenSRS {
 	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function createNameserverRaw($cookie, $hostname, $ip, $useDomain = FALSE) {
+	public static function createNameserverRaw($cookie, $hostname, $ip, $useDomain = false)
+	{
 		$callstring = json_encode([
 			'func' => 'nsCreate',
 			'attributes' => [
-				$useDomain === FALSE ? 'cookie' : 'domain' => $cookie,
+				$useDomain === false ? 'cookie' : 'domain' => $cookie,
 				'name' => $hostname,
 				'ipaddress' => $ip
 		]]);
@@ -389,11 +405,10 @@ class OpenSRS {
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && $osrsHandler->resultFullRaw['is_success'] == 1) {
 			// echo $osrsHandler->resultFullRaw['response_text'].'<br>';
-			return TRUE;
+			return true;
 		} else {
 			// echo 'ERROR: '.$osrsHandler->resultFullRaw['response_text'].'<br>';
-			return FALSE;
-
+			return false;
 		}
 		//echo '<pre>'; print_r($osrsHandler->resultFullRaw); echo '</pre>';
 	}
@@ -406,25 +421,25 @@ class OpenSRS {
 	 * @param bool $useDomain
 	 * @return bool true if successful, false if there was an error.
 	 */
-	public static function deleteNameserverRaw($cookie, $hostname, $ip, $useDomain = FALSE) {
+	public static function deleteNameserverRaw($cookie, $hostname, $ip, $useDomain = false)
+	{
 		$callstring = json_encode([
 			'func' => 'nsDelete',
 			'attributes' => [
-				$useDomain === FALSE ? 'cookie' : 'domain' => $cookie,
+				$useDomain === false ? 'cookie' : 'domain' => $cookie,
 				'name' => $hostname,
 				'ipaddress' => $ip
 		]]);
 		//echo "Call String: $callstring\n<br>";
 		$osrsHandler = self::request($callstring);
-		request_log('domains', FALSE, __FUNCTION__, 'opensrs', 'nsDelete', $callstring, $osrsHandler);
+		request_log('domains', false, __FUNCTION__, 'opensrs', 'nsDelete', $callstring, $osrsHandler);
 		myadmin_log('domains', 'info', 'Delete NS Response'.json_encode($osrsHandler), __LINE__, __FILE__);
 		if ($osrsHandler->resultFullRaw['is_success'] == 1) {
 			//			echo $osrsHandler->resultFullRaw['response_text'].'<br>';
-			return TRUE;
+			return true;
 		} else {
 			//			echo 'ERROR: '.$osrsHandler->resultFullRaw['response_text'].'<br>';
-			return FALSE;
-
+			return false;
 		}
 		//echo '<pre>'; print_r($osrsHandler->resultFullRaw); echo '</pre>';
 	}
@@ -448,7 +463,8 @@ class OpenSRS {
 	 * @param int $getRequestAddress Flag to request the registrant's contact email address. This is useful if you want to make sure that your client can receive mail at that address to acknowledge the transfer. Allowed values are 0 or 1.
 	 * @return array|bool
 	 */
-	public static function transferCheck($domain, $checkStatus = 0, $getRequestAddress = 0) {
+	public static function transferCheck($domain, $checkStatus = 0, $getRequestAddress = 0)
+	{
 		$callstring = json_encode([
 			'func' => 'transCheck',
 			'attributes' => [
@@ -457,8 +473,9 @@ class OpenSRS {
 				'get_request_address' => $getRequestAddress
 		]]);
 		$osrsHandler = self::request($callstring);
-		if ($osrsHandler === FALSE)
-			return FALSE;
+		if ($osrsHandler === false) {
+			return false;
+		}
 		return $osrsHandler->resultFullRaw;
 	}
 
@@ -474,7 +491,8 @@ class OpenSRS {
 	 * @param string $type Type of query. Allowed values are: 'admin—Returns' - admin contact information.	  'all_info' - Returns all information. 'auto_renew_flag' - Deprecated, Returned list of domains. 'billing' - Returns billing contact information. 'ca_whois_display_setting' - Returns the current CIRA Whois Privacy setting for .CA domains. 'domain_auth_info' ' - Returns domain authorization code, if applicable. 'expire_action' Returns the action to be taken upon domain expiry, specifically whether to auto-renew the domain, or let it expire silently. 'forwarding_email' - Returns forwarding email for .NAME 2nd level. 'it_whois_display_setting' - Returns the current Whois Privacy setting for .IT domains. 'list' - Returns list of domains for user. 'nameservers' - Returns nameserver information. 'owner' - Returns owner contact information. 'rsp_whois_info' - Returns name and contact information for RSP. 'status' - Returns lock or escrow status of the domain. 'tech' - Returns tech contact information. 'tld_data' - Returns additional information that is required by some registries, such as the residency of the registrant. 'trademark' - Deprecated. Used for .CA domains; returns 'Y' or 'N' value indicating whether the registered owner of the domain name is the legal holder of the trademark for that word. 'waiting history' - Returns information on asynchronous requests. 'whois_privacy_state ' - Returns the state for the WHOIS Privacy feature: enabled, disabled, enabling, or disabling. Note: If the TLD does not allow WHOIS Privacy, always returns Disabled. 'xpack_waiting_history' - Returns the state of completed/cancelled requests not yet deleted from the database for .DK domains. All completed/cancelled requests are deleted from the database two
 	 * @return array|bool
 	 */
-	public static function lookupGetDomain($domain, $type = 'all_info') {
+	public static function lookupGetDomain($domain, $type = 'all_info')
+	{
 		$callstring = json_encode([
 			'func' => 'lookupGetDomain',
 			'attributes' => [
@@ -488,8 +506,9 @@ class OpenSRS {
 				'min_to_expiry' => ''
 		]]);
 		$osrsHandler = self::request($callstring);
-		if ($osrsHandler === FALSE)
-			return FALSE;
+		if ($osrsHandler === false) {
+			return false;
+		}
 		return $osrsHandler->resultFullRaw;
 	}
 
@@ -500,20 +519,23 @@ class OpenSRS {
 	 * @param bool|string $selected false to not use this, tld to use just the tld from the domain, or available to use aall availalbe tlds
 	 * @return array|bool
 	 */
-	public static function lookupDomain($domain, $selected = FALSE) {
+	public static function lookupDomain($domain, $selected = false)
+	{
 		$callarray = [
 			'func' => 'lookupDomain',
 			'attributes' => [
 				'domain' => $domain
 		]];
-		if ($selected == 'tld')
+		if ($selected == 'tld') {
 			$callarray['attributes']['selected'] = get_domain_tld($domain);
-		elseif ($selected == 'available')
+		} elseif ($selected == 'available') {
 			$callarray['attributes']['selected'] = implode(';', get_available_domain_tlds());
+		}
 		$callstring = json_encode($callarray);
 		$osrsHandler = self::request($callstring);
-		if ($osrsHandler === FALSE)
-			return FALSE;
+		if ($osrsHandler === false) {
+			return false;
+		}
 		return $osrsHandler->resultFullRaw;
 	}
 
@@ -522,21 +544,26 @@ class OpenSRS {
 	 * @param string $domain the domain name to lookup
 	 * @return bool returns true if the domain is available, false otherwise
 	 */
-	public static function checkDomainAvailable($domain) {
+	public static function checkDomainAvailable($domain)
+	{
 		$result = self::lookupDomain($domain);
-		if ($result === FALSE)
-			return FALSE;
-		elseif (isset($result['attributes']['status']))
-			return ($result['attributes']['status'] == 'available' ? TRUE : FALSE);
-		else
+		if ($result === false) {
+			return false;
+		} elseif (isset($result['attributes']['status'])) {
+			return ($result['attributes']['status'] == 'available' ? true : false);
+		} else {
 			$resultValues = array_values($result);
-			foreach ($resultValues as $data)
-				if (isset($data['domain']) && $data['domain'] == $domain)
-					if ($data['status'] == 'available')
-						return TRUE;
-					else
-						return FALSE;
-		return FALSE;
+		}
+		foreach ($resultValues as $data) {
+			if (isset($data['domain']) && $data['domain'] == $domain) {
+				if ($data['status'] == 'available') {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -546,7 +573,8 @@ class OpenSRS {
 	 * @param string $regType registration type, defaults to 'new', can be new, transfer, or renew
 	 * @return false|float false if there was an error or the price
 	 */
-	public static function lookupDomainPrice($domain, $regType = 'new') {
+	public static function lookupDomainPrice($domain, $regType = 'new')
+	{
 		$callstring = json_encode([
 			//'func' => 'allinoneDomain',
 			//'func' => 'PremiumDomain',
@@ -562,10 +590,12 @@ class OpenSRS {
 		$osrsHandler = self::request($callstring);
 		//myadmin_log('domains', 'info', json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
 		$resultValues = array_values($osrsHandler->resultFullRaw);
-		foreach ($resultValues as $data)
-			if (isset($data['domain']) && $data['domain'] == $domain)
+		foreach ($resultValues as $data) {
+			if (isset($data['domain']) && $data['domain'] == $domain) {
 				return $data['price'];
-		return FALSE;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -575,20 +605,22 @@ class OpenSRS {
 	 * @param string $function the search function to perform
 	 * @return array|bool
 	 */
-	public static function searchDomain($domain, $function) {
+	public static function searchDomain($domain, $function)
+	{
 		$final = [];
 		$tlds = get_available_domain_tlds_by_tld();
 		$tldPrices = get_service_tld_pricing();
-		if (in_array($function, ['allinoneDomain']))
+		if (in_array($function, ['allinoneDomain'])) {
 			myadmin_log('domains', 'error', "searchDomain call passed obsolete function $function, use SuggestDomain instead.", __LINE__, __FILE__);
-		if (in_array($function, ['allinoneDomain', 'SuggestDomain']))
+		}
+		if (in_array($function, ['allinoneDomain', 'SuggestDomain'])) {
 			$callstring = json_encode([
 				'func' => $function,
 				'attributes' => [
 					'searchstring' => $domain, // These are optional
 					'tlds' => array_keys($tlds)
 			]]);
-		else
+		} else {
 			$callstring = json_encode([
 				'func' => $function,
 				'attributes' => [
@@ -596,35 +628,45 @@ class OpenSRS {
 					'selected' => implode(';', array_keys($tlds)),
 					'alldomains' => implode(';', array_keys($tlds))
 			]]);
+		}
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 			$resultTypes = array_keys($osrsHandler->resultFullRaw['attributes']);
-			foreach ($resultTypes as $resultType)
-				if (isset($osrsHandler->resultFullRaw['attributes'][$resultType]['items']))
-					foreach ($osrsHandler->resultFullRaw['attributes'][$resultType]['items'] as $idx => $data)
+			foreach ($resultTypes as $resultType) {
+				if (isset($osrsHandler->resultFullRaw['attributes'][$resultType]['items'])) {
+					foreach ($osrsHandler->resultFullRaw['attributes'][$resultType]['items'] as $idx => $data) {
 						if (isset($data['domain'])) {
 							$tld = get_domain_tld($data['domain']);
 							if ($tld != '') {
-								if ($tld[0] != '.')
+								if ($tld[0] != '.') {
 									$tld = '.'.$tld;
+								}
 								if (isset($tlds[$tld])) {
 									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['id'] = $tlds[$tld]['id'];
 									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['tld'] = $tld;
 									$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['cost'] = $tlds[$tld]['cost'];
 									if (isset($tldPrices[$tld]['new'])) {
 										$diff = bcsub($tlds[$tld]['cost'], $tldPrices[$tld]['new'], 2);
-										if (isset($tldPrices[$tld]['new']))
+										if (isset($tldPrices[$tld]['new'])) {
 											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['new'] = bcadd($tldPrices[$tld]['new'], $diff, 2);
-										if (isset($tldPrices[$tld]['renewal']))
+										}
+										if (isset($tldPrices[$tld]['renewal'])) {
 											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['renewal'] = bcadd($tldPrices[$tld]['renewal'], $diff, 2);
-										if (isset($tldPrices[$tld]['transfer']))
+										}
+										if (isset($tldPrices[$tld]['transfer'])) {
 											$osrsHandler->resultFullRaw['attributes'][$resultType]['items'][$idx]['transfer'] = bcadd($tldPrices[$tld]['transfer'], $diff, 2);
+										}
 									}
-								} else
+								} else {
 									myadmin_log('domains', 'info', "tld $tld was not set", __LINE__, __FILE__);
-							} else
+								}
+							} else {
 								myadmin_log('domains', 'info', "domain {$data['domain']} got blank TLD response {$tld}", __LINE__, __FILE__);
+							}
 						}
+					}
+				}
+			}
 			$final['domainData'] = $osrsHandler->resultFullRaw;
 		}
 		$final['tlds'] = $tlds;
@@ -637,12 +679,14 @@ class OpenSRS {
 	 * @param bool $lock
 	 * @return bool
 	 */
-	public static function lock($domain, $lock = TRUE) {
-		$lockStatusUpdate = $lock === TRUE ? 1 : 0;
+	public static function lock($domain, $lock = true)
+	{
+		$lockStatusUpdate = $lock === true ? 1 : 0;
 		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'lock_state'=>$lockStatusUpdate,'data'=>'status']);
-		if ($response === FALSE || !$response['lines'][20])
-			return FALSE;
-		return TRUE;
+		if ($response === false || !$response['lines'][20]) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -652,14 +696,16 @@ class OpenSRS {
 	 * @param bool   $enabled true if privacy status should be on, false if not
 	 * @return bool
 	 */
-	public static function whoisPrivacy($domain, $enabled) {
-		$privacyStatusUpdate = $enabled == TRUE ? 'enable' : 'disable';
+	public static function whoisPrivacy($domain, $enabled)
+	{
+		$privacyStatusUpdate = $enabled == true ? 'enable' : 'disable';
 		$response = self::xmlRequest('modify', 'domain', ['domain_name'=>$domain,'state'=>$privacyStatusUpdate,'data'=>'whois_privacy_state']);
-		if ($response === FALSE)
-			return FALSE;
+		if ($response === false) {
+			return false;
+		}
 		$result2 = trim(strip_tags($response['lines'][17]));
 		myadmin_log('domains', 'info', "OpenSRS::whoisPrivacy({$domain}, {$privacyStatusUpdate}) returned {$result2}", __LINE__, __FILE__);
-		return TRUE;
+		return true;
 	}
 
 	/**
@@ -669,33 +715,38 @@ class OpenSRS {
 	 * @param bool|false|string $endDate   end date for lookups, or false(default) or 12-31 in 20 years
 	 * @return array array of domains in the format of domain => expire date
 	 */
-	public static function listDomainsByExpireyDate($startDate = FALSE, $endDate = FALSE) {
-		if ($startDate == FALSE)
+	public static function listDomainsByExpireyDate($startDate = false, $endDate = false)
+	{
+		if ($startDate == false) {
 			$startDate = date('Y-m-d', strtotime(date('Y').'-01-01 +45 days'));
-		if ($endDate == FALSE)
+		}
+		if ($endDate == false) {
 			$endDate = date('Y-m-d', strtotime(date('Y').'-12-31 +20 years'));
+		}
 		$fromDate = date('Y-m-d', strtotime($startDate));
 		$toDate = date('Y-m-d', strtotime($endDate));
 		$limit = 99999;
 		$page = 0;
-		$endPages = FALSE;
+		$endPages = false;
 		$domains = [];
-		while ($endPages == FALSE) {
+		while ($endPages == false) {
 			$page++;
 			$response = self::xmlRequest('get_domains_by_expiredate', 'domain', ['limit'=>$limit,'exp_from'=>$fromDate,'exp_to'=>$toDate,'page'=>$page]);
-			if ($response === FALSE)
-				$endPages = TRUE;
-			else {
+			if ($response === false) {
+				$endPages = true;
+			} else {
 				if (!isset($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
 					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($response['xml_array']), __LINE__, __FILE__);
-					$endPages = TRUE;
+					$endPages = true;
 				} else {
 					$domainArray = $response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
 					$domainValues = array_values($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']);
-					foreach ($domainValues as $domainData)
+					foreach ($domainValues as $domainData) {
 						$domains[$domainData['dt_assoc']['item'][1]] = $domainData['dt_assoc']['item'][2];
-					if (sizeof($domainArray) < $limit)
-						$endPages = TRUE;
+					}
+					if (sizeof($domainArray) < $limit) {
+						$endPages = true;
+					}
 				}
 			}
 		}
@@ -708,19 +759,23 @@ class OpenSRS {
 	 * @param string $domain the domain name or part to search for
 	 * @return array returns true if domain cancelled else false
 	 */
-	public static function redeemDomain($domain) {
+	public static function redeemDomain($domain)
+	{
 		$response = self::xmlRequest('REDEEM', 'DOMAIN', ['domain'=>$domain]);
-		if ($response === FALSE)
-			return FALSE;
+		if ($response === false) {
+			return false;
+		}
 		$resultArray = $response['xml_array']['body']['data_block']['dt_assoc'];
 		myadmin_log('domains', 'info', "OpenSRS::redeemDomain({$domain}) returned {$resultArray}", __LINE__, __FILE__);
 		return $resultArray;
 	}
 
-	public static function ackEvent($event_id) {
+	public static function ackEvent($event_id)
+	{
 		$response = self::xmlRequest('EVENT', 'ACK', ['event_id'=>$event_id]);
-		if ($response === FALSE)
-			return FALSE;
+		if ($response === false) {
+			return false;
+		}
 		//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
 		$response['xml_array'] = $response['xml_array']['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
 		$resultArray = self::response_to_array($response['xml_array']);
@@ -736,9 +791,10 @@ class OpenSRS {
 	 * @param int $limit optional limit, defaults to 1 (which is also the recomended amount to process at once), allows for polling multiple (up to 100 maximum) events at a time
 	 * @return array returns some crap
 	 */
-	public static function pollEvent($limit = 1) {
+	public static function pollEvent($limit = 1)
+	{
 		$response = self::xmlRequest('EVENT', 'POLL', ['limit'=>$limit]);
-		if ($response['xml_str'] !== FALSE) {
+		if ($response['xml_str'] !== false) {
 			//function_requirements('xml2array');
 			//$response['xml_array'] = xml2array($response['xml_str'], 1, 'attribute');
 			$response['xml_array'] = $response['xml_array']['OPS_envelope']['body']['data_block']['dt_assoc']['item'];
