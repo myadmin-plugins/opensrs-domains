@@ -181,7 +181,7 @@ class Plugin
 				$username = mb_substr($username, 0, 15);
 			}
 			$password = $serviceClass->getPassword();
-			if (trim($password) == '') {
+			if (trim($password) == '' || strlen(trim($password)) < 10) {
 				$password = _randomstring(20);
 			}
 			$serviceInfo = $serviceTypes[$serviceClass->getType()];
