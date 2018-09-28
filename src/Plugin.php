@@ -120,7 +120,7 @@ class Plugin
 	public static function getRequirements(GenericEvent $event)
 	{
 		$loader = $event->getSubject();
-		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
+		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
 	}
 
 	/**
