@@ -1,5 +1,5 @@
 {
-	"name": "detain/opensrs-domains",
+	"name": "detain/myadmin-opensrs-domains",
 	"type": "myadmin-plugin",
 	"description": "Opensrs Domains Class",
 	"keywords": [
