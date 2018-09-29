@@ -9,6 +9,7 @@
 namespace Detain\MyAdminOpenSRS;
 
 require_once __DIR__.'/openSRS_loader.php';
+require_once __DIR__.'/../../../workerman/statistics/Applications/Statistics/Clients/StatisticClient.php';
 use opensrs\APIException;
 use opensrs\Exception;
 use opensrs\Request;
@@ -182,24 +183,34 @@ class OpenSRS
 	/**
 	 * performs the common request code
 	 *
-	 * @param mixed $callstring
+	 * @param string|array $callstring array or string with the request info
 	 */
 	public static function request($callstring)
 	{
+		if (is_string($callstring)) {
+			$callstring = json_decode($callstring, true);
+			$action = $callstring['func'];
+		} else {
+			$action = $callstring['func'];
+		}
+		$callstring = json_encode($callstring);
+		\StatisticClient::tick('OpenSRS', $action);
 		try {
 			$request = new Request();
 			$osrsHandler = $request->process('json', $callstring);
 		} catch (\opensrs\APIException $e) {
-			$error_message = $e->getMessage();
 			$info = $e->getInfo();
 			$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
-			myadmin_log('opensrs', 'error', $callstring.':'.$error_message.':'.$info, __LINE__, __FILE__);
-			add_output($error_message.':'.$info.'<br>');
+			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage().':'.$info, __LINE__, __FILE__);
+			add_output($e->getMessage().':'.$info.'<br>');
+			\StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
 			return false;
 		} catch (\opensrs\Exception $e) {
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+			\StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
 			return false;
 		}
+		\StatisticClient::report('OpenSRS', $action, true, 0, '', STATISTICS_SERVER);
 		return $osrsHandler;
 	}
 
@@ -292,7 +303,7 @@ class OpenSRS
 	 */
 	public function loadDomainInfo()
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
 				//'cookie' => $this->cookie,
@@ -304,9 +315,9 @@ class OpenSRS
 				'page' => '',
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
-		]]);
+		]];
 		$this->osrsHandlerAllInfo = self::request($callstring);
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
 				//'cookie' => $this->cookie,
@@ -318,10 +329,10 @@ class OpenSRS
 				'page' => '',
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
-		]]);
+		]];
 		$this->osrsHandlerWhoisPrivacy = self::request($callstring);
 		$this->whoisPrivacy = $this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']['state'];
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
 				//'cookie' => $this->cookie,
@@ -333,7 +344,7 @@ class OpenSRS
 				'page' => '',
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
-		]]);
+		]];
 		$this->osrsHandlerStatus = self::request($callstring);
 		$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
 		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
@@ -349,13 +360,13 @@ class OpenSRS
 	 */
 	public static function getCookieRaw($username, $password, $domain)
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'cookieSet',
 			'attributes' => [
 				'reg_username' => $username,
 				'reg_password' => $password,
 				'domain' => $domain
-		]]);
+		]];
 		$osrsHandler = self::request($callstring);
 		request_log('domains', false, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
 		if (!isset($osrsHandler->resultFullRaw['attributes'])) {
@@ -373,12 +384,12 @@ class OpenSRS
 	 */
 	public static function getNameserversRaw($cookie)
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'nsGet',
 			'attributes' => [
 				'cookie' => $cookie,
 				'name' => 'all'
-		]]);
+		]];
 		$osrsHandler = self::request($callstring);
 		request_log('domains', false, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
 		return isset($osrsHandler->resultFullRaw['nameserver_list']) ? $osrsHandler->resultFullRaw['nameserver_list'] : false;
@@ -394,13 +405,13 @@ class OpenSRS
 	 */
 	public static function createNameserverRaw($cookie, $hostname, $ip, $useDomain = false)
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'nsCreate',
 			'attributes' => [
 				$useDomain === false ? 'cookie' : 'domain' => $cookie,
 				'name' => $hostname,
 				'ipaddress' => $ip
-		]]);
+		]];
 		//echo "Call String: $callstring\n<br>";
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && $osrsHandler->resultFullRaw['is_success'] == 1) {
@@ -423,13 +434,13 @@ class OpenSRS
 	 */
 	public static function deleteNameserverRaw($cookie, $hostname, $ip, $useDomain = false)
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'nsDelete',
 			'attributes' => [
 				$useDomain === false ? 'cookie' : 'domain' => $cookie,
 				'name' => $hostname,
 				'ipaddress' => $ip
-		]]);
+		]];
 		//echo "Call String: $callstring\n<br>";
 		$osrsHandler = self::request($callstring);
 		request_log('domains', false, __FUNCTION__, 'opensrs', 'nsDelete', $callstring, $osrsHandler);
@@ -465,13 +476,13 @@ class OpenSRS
 	 */
 	public static function transferCheck($domain, $checkStatus = 0, $getRequestAddress = 0)
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'transCheck',
 			'attributes' => [
 				'domain' => $domain,
 				'check_status' => $checkStatus,
 				'get_request_address' => $getRequestAddress
-		]]);
+		]];
 		$osrsHandler = self::request($callstring);
 		if ($osrsHandler === false) {
 			return false;
@@ -493,7 +504,7 @@ class OpenSRS
 	 */
 	public static function lookupGetDomain($domain, $type = 'all_info')
 	{
-		$callstring = json_encode([
+		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
 				'domain' => $domain,
@@ -504,7 +515,7 @@ class OpenSRS
 				'page' => '',
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
-		]]);
+		]];
 		$osrsHandler = self::request($callstring);
 		if ($osrsHandler === false) {
 			return false;
@@ -531,7 +542,7 @@ class OpenSRS
 		} elseif ($selected == 'available') {
 			$callarray['attributes']['selected'] = implode(';', get_available_domain_tlds());
 		}
-		$callstring = json_encode($callarray);
+		$callstring = $callarray;
 		$osrsHandler = self::request($callstring);
 		if ($osrsHandler === false) {
 			return false;
@@ -575,7 +586,7 @@ class OpenSRS
 	 */
 	public static function lookupDomainPrice($domain, $regType = 'new')
 	{
-		$callstring = json_encode([
+		$callstring = [
 			//'func' => 'allinoneDomain',
 			//'func' => 'PremiumDomain',
 			//'func' => 'SuggestDomain',
@@ -586,7 +597,7 @@ class OpenSRS
 				'reg_type' => $regType,
 				//'tlds' => array_keys(get_available_domain_tlds_by_tld()),
 				//'tlds' => array(get_domain_tld($domain)),
-		]]);
+		]];
 		$osrsHandler = self::request($callstring);
 		//myadmin_log('domains', 'info', json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__);
 		$resultValues = array_values($osrsHandler->resultFullRaw);
@@ -614,20 +625,20 @@ class OpenSRS
 			myadmin_log('domains', 'error', "searchDomain call passed obsolete function $function, use SuggestDomain instead.", __LINE__, __FILE__);
 		}
 		if (in_array($function, ['allinoneDomain', 'SuggestDomain'])) {
-			$callstring = json_encode([
+			$callstring = [
 				'func' => $function,
 				'attributes' => [
 					'searchstring' => $domain, // These are optional
 					'tlds' => array_keys($tlds)
-			]]);
+			]];
 		} else {
-			$callstring = json_encode([
+			$callstring = [
 				'func' => $function,
 				'attributes' => [
 					'domain' => $domain, // These are optional
 					'selected' => implode(';', array_keys($tlds)),
 					'alldomains' => implode(';', array_keys($tlds))
-			]]);
+			]];
 		}
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
