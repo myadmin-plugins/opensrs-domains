@@ -168,10 +168,16 @@ class Plugin
 			$db->next_record();
 			if ($db->Record['invoices_amount'] == '1.99') {
 				$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
-				$db->next_record();
-				if ($db->Record['website_status'] == 'pending') {
-					dialog('Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
-					myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
+				if ($db->num_rows() > 0) {
+					$db->next_record();
+					if ($db->Record['website_status'] != 'active') {
+						dialog('Your webhosting - '.$db->Record['website_id'].' order is not active.');
+						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
+						return false;
+					}
+				} else {
+					dialog('Webhosting order is missing. Please contact our support team.');
+					myadmin_log('opensrs', 'info', "Webhosting order is missing.", __LINE__, __FILE__);
 					return false;
 				}
 			}
