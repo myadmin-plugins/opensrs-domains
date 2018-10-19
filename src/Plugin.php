@@ -164,23 +164,6 @@ class Plugin
 				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
 				return false;
 			}
-			$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
-			$db->next_record();
-			if ($db->Record['invoices_amount'] == '1.99') {
-				$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
-				if ($db->num_rows() > 0) {
-					$db->next_record();
-					if ($db->Record['website_status'] != 'active') {
-						dialog('Your webhosting - '.$db->Record['website_id'].' order is not active.');
-						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
-						return false;
-					}
-				} else {
-					dialog('Webhosting order is missing. Please contact our support team.');
-					myadmin_log('opensrs', 'info', "Webhosting order is missing.", __LINE__, __FILE__);
-					return false;
-				}
-			}
 			$username = $serviceClass->getUsername();
 			if (trim($username) == '') {
 				$username = str_replace(['-', '.'], ['', ''], strtolower($serviceClass->getHostname()));
@@ -227,6 +210,19 @@ class Plugin
 				} else {
 					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
 					dialog('Domain Renewal Error', 'Domain Expiration date is over!', false, '{width: "auto"}');
+				}
+			}
+			if ($renew === false) {
+				$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
+				$db->next_record();
+				if ($db->Record['invoices_amount'] == '1.99') {
+					$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
+					$db->next_record();
+					if ($db->Record['website_status'] == 'pending') {
+						dialog('Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
+						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
+						return false;
+					}
 				}
 			}
 			$error = false;
