@@ -218,13 +218,13 @@ class Plugin
 				if ($db->Record['invoices_amount'] == '1.99') {
 					$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
 					if ($db->num_rows() == 0) {
-						dialog('Something went wrong. Please contact support team.');
+						dialog('Failed', 'Something went wrong. Please contact support team.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__);
 						return false;
 					}
 					$db->next_record();
 					if ($db->Record['website_status'] != 'active') {
-						dialog('Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
+						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
 						return false;
 					}
