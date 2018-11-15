@@ -314,7 +314,7 @@ class Plugin
 					$db2->query("select websites.*, website_name, website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
 					if ($db2->num_rows() > 0) {
 						$db2->next_record(MYSQL_ASSOC);
-						if (preg_match("/^webhosting(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches) && ($matches['id'] == 1000 || $matches['id'] >= 2003)) {
+						if (preg_match("/^webhosting(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches) && (in_array($matches['id'], [900, 1000]) || $matches['id'] >= 2003)) {
 							$dns1 = 'dns'.$matches['id'].'a.trouble-free.net';
 							$dns2 = 'dns'.$matches['id'].'b.trouble-free.net';
 						} else {
