@@ -94,7 +94,7 @@ class Plugin
 	{
 		$serviceClass = $event->getSubject();
 		if ($event['category'] == get_service_define('OPENSRS')) {
-			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__);
+			myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$return = self::activate_domain($serviceClass->getId());
 			$event['success'] = $return;
 			$event->stopPropagation();
@@ -167,7 +167,7 @@ class Plugin
 			$data = $GLOBALS['tf']->accounts->read($serviceClass->getCustid());
 			if ($data['status'] == 'locked') {
 				dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
-				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__);
+				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				return false;
 			}
 			$username = $serviceClass->getUsername();
@@ -182,14 +182,14 @@ class Plugin
 			$serviceInfo = $serviceTypes[$serviceClass->getType()];
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
-			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__);
+			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 
 			$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 			if ($response !== false && isset($response['attributes']['expiredate'])) {
 				$expiry_full_date = $response['attributes']['expiredate'];
 				$parts = explode('-', $expiry_full_date);
 				$expireyear =  $parts[0];
-				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__);
+				myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$db->query("SELECT * FROM tld_info WHERE tld_tld = '$serviceTld'");
 				if ($db->num_rows() > 0) {
 					$db->next_record();
@@ -197,24 +197,24 @@ class Plugin
 					$d_remains = intval($tld_info['tld_grace_period']) + intval($tld_info['tld_redemption_period']);
 					$e_date = date('Y-m-d', strtotime($expiry_full_date));
 					$redempt_date = date('Y-m-d', strtotime($e_date.' +'.$d_remains.' days'));
-					myadmin_log('domains', 'info', "Grace Period - ".intval($tld_info['tld_grace_period']), __LINE__, __FILE__);
-					myadmin_log('domains', 'info', "Redemption Period - ".intval($tld_info['tld_redemption_period']), __LINE__, __FILE__);
-					myadmin_log('domains', 'info', "Final date for renewal - {$redempt_date}", __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Grace Period - ".intval($tld_info['tld_grace_period']), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					myadmin_log('domains', 'info', "Redemption Period - ".intval($tld_info['tld_redemption_period']), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					myadmin_log('domains', 'info', "Final date for renewal - {$redempt_date}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} else {
 					$redempt_date = date('Y-m-d', strtotime($expiry_full_date));
-					myadmin_log('domains', 'info', "TLD record not found - {$serviceTld}", __LINE__, __FILE__);
-					myadmin_log('domains', 'info', "Setting Final date for renewal as expiration date - {$redempt_date}", __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "TLD record not found - {$serviceTld}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					myadmin_log('domains', 'info', "Setting Final date for renewal as expiration date - {$redempt_date}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				}
 				$date_today = date('Y-m-d H:i:s');
 				$date_only_today = date('Y-m-d');
 				if (strtotime($expiry_full_date) >= strtotime($date_today)) {
 					$renew = true;
-					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Domain Renewal process started.", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} elseif (strtotime($redempt_date) >= strtotime($date_only_today)) {
 					$renew = true;
-					myadmin_log('domains', 'info', "Domain Renewal process started based on redemption date.", __LINE__, __FILE__);
+					myadmin_log('domains', 'info', "Domain Renewal process started based on redemption date.", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} else {
-					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__);
+					myadmin_log('domains', 'error', "Error in domain renewal domain expiration date is over!", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					dialog('Domain Renewal Error', 'Domain Expiration date is over!', false, '{width: "auto"}');
 				}
 			}
@@ -225,13 +225,13 @@ class Plugin
 					$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
 					if ($db->num_rows() == 0) {
 						dialog('Failed', 'Something went wrong. Please contact support team.');
-						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__);
+						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						return false;
 					}
 					$db->next_record();
 					if ($db->Record['website_status'] != 'active') {
 						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
-						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__);
+						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						return false;
 					}
 				}
