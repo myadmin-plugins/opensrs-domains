@@ -285,7 +285,7 @@ class OpenSRS
 			if (!$response['xml_obj']) {
 				$errors = libxml_get_errors();
 				foreach ($errors as $error) {
-					myadmin_log('domains', 'error', 'This Line `'.$xml[$error->line - 1].'` gave a '.$levels[$error->level].' #'.$error->code.' `'.$error->message.'` at Line '.$error->line.' Column '.$error->column.' File '.$error->file, __LINE__, __FILE__);
+					myadmin_log('domains', 'error', 'This Line `'.$xml[$error->line - 1].'` gave a '.$levels[$error->level].' #'.$error->code.' `'.$error->message.'` at Line '.$error->line.' Column '.$error->column.' File '.$error->file, __LINE__, __FILE__, self::$module);
 				}
 				libxml_clear_errors();
 				return false;
