@@ -638,7 +638,7 @@ The Error message from the registrar was:<br>
 <br>
 To fix this and help ensure your domain registration goes through smoothly please<br>
 update the appropriate info at this url:<br>
-<a href="https://'.DOMAIN.URLDIR.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.URLDIR.$GLOBALS['tf']->link('/index.php',
+<a href="https://'.DOMAIN.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.$GLOBALS['tf']->link('/index.php',
 				'choice=none.view_domain&id='.$id).'</a><br>
 and then contact support@interserver.net to have them try the domain registration again.<br>
 <br>
