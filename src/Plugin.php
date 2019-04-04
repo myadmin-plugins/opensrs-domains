@@ -119,22 +119,22 @@ class Plugin
 	 */
 	public static function getRequirements(GenericEvent $event)
 	{
-        /**
-         * @var \MyAdmin\Plugins\Loader $this->loader
-         */
-        $loader = $event->getSubject();
+		/**
+		 * @var \MyAdmin\Plugins\Loader $this->loader
+		 */
+		$loader = $event->getSubject();
 		$loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
 	}
 
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-    public static function getSettings(GenericEvent $event)
-    {
-        /**
-         * @var \MyAdmin\Settings $settings
-         **/
-        $settings = $event->getSubject();
+	public static function getSettings(GenericEvent $event)
+	{
+		/**
+		 * @var \MyAdmin\Settings $settings
+		 **/
+		$settings = $event->getSubject();
 		$settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_username', _('OpenSRS Username'), _('Username to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_USERNAME'));
 		$settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_password', _('OpenSRS Password'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_PASSWORD'));
 		$settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_key', _('OpenSRS API Key'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_KEY'));
@@ -638,8 +638,10 @@ The Error message from the registrar was:<br>
 <br>
 To fix this and help ensure your domain registration goes through smoothly please<br>
 update the appropriate info at this url:<br>
-<a href="https://'.DOMAIN.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.$GLOBALS['tf']->link('/index.php',
-				'choice=none.view_domain&id='.$id).'</a><br>
+<a href="https://'.DOMAIN.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.$GLOBALS['tf']->link(
+					'/index.php',
+					'choice=none.view_domain&id='.$id
+				).'</a><br>
 and then contact support@interserver.net to have them try the domain registration again.<br>
 <br>
 Interserver, Inc.<br>
