@@ -228,8 +228,12 @@ class Plugin
 						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						return false;
 					}
-					$db->next_record();
-					if ($db->Record['website_status'] != 'active') {
+					$website_active = false;
+					while ($db->next_record(MYSQL_ASSOC)) {
+						if ($db->Record['website_status'] == 'active')
+							$website_active = true;
+					}
+					if ($website_active === true) {
 						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						return false;
