@@ -743,7 +743,6 @@ class OpenSRS
 		while ($endPages == false) {
 			$page++;
 			$response = self::xmlRequest('get_domains_by_expiredate', 'domain', ['limit'=>$limit,'exp_from'=>$fromDate,'exp_to'=>$toDate,'page'=>$page]);
-			file_put_contents('domains-'.$page.'.json', json_encode($response['xml_array'], JSON_PRETTY_PRINT));
             if ($response === false) {
 				$endPages = true;
 			} else {
