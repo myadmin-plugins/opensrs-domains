@@ -233,7 +233,7 @@ class Plugin
 						if ($db->Record['website_status'] == 'active')
 							$website_active = true;
 					}
-					if ($website_active === true) {
+					if ($website_active == false) {
 						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						return false;
