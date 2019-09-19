@@ -385,7 +385,7 @@ class Plugin
 				if (trim($serviceClass->getFax()) != '') {
 					$callArray['fax'] = $serviceClass->getFax();
 				}
-				if (in_array($serviceTld, ['.abogado', '.aero', '.asia', '.cl', '.co.hu', '.com.ar', '.com.br', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fr', '.hk', '.hu', '.it', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pro', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.uk', '.us', '.wf', '.xxx', '.yt'])) {
+				if (in_array($serviceTld, ['.abogado', '.aero', '.asia', '.cl', '.co.hu', '.com.au', '.com.ar', '.com.br', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fr', '.hk', '.hu', '.it', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pro', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.uk', '.us', '.wf', '.xxx', '.yt'])) {
 					$callArray['data']['tld_data'] = [];
 					if (in_array($serviceTld, ['.abogado', '.aero', '.cl', '.co.hu', '.com.ar', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fi.', '.fr', '.hk', '.hu', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.wf', '.yt'])) {
 						$callArray['data']['tld_data']['registrant_extra_info'] = [];
@@ -446,6 +446,19 @@ class Plugin
 							$callArray['data']['tld_data']['registrant_extra_info'] = $extraInfo;
 						}
 					} else {
+						if ($serviceTld == '.com.au') {
+							$au_registrant_info = [
+								'policy_reason' => $extra['policy_reason'],
+								'registrant_id_type' => $extra['registrant_id_type'],
+								'registrant_id' => $extra['registrant_id'],
+								'registrant_name' => $extra['registrant_name'],
+								'eligibility_id_type' => $extra['eligibility_id_type'],
+								'eligibility_id' => $extra['eligibility_id'],
+								'eligibility_name' => $extra['eligibility_name'],
+								'eligibility_type' => $extra['eligibility_type']
+							];
+							$callArray['data']['tld_data']['au_registrant_info'] = $au_registrant_info;
+						}
 						// .asia Domains
 						if ($serviceTld == '.asia') {
 							$callArray['data']['tld_data']['cedinfo'] = [
