@@ -736,29 +736,49 @@ class OpenSRS
 		}
 		$fromDate = date('Y-m-d', strtotime($startDate));
 		$toDate = date('Y-m-d', strtotime($endDate));
-		$limit = 99999;
+		$limit = 5000;
 		$page = 0;
 		$endPages = false;
 		$domains = [];
 		while ($endPages == false) {
 			$page++;
 			$response = self::xmlRequest('get_domains_by_expiredate', 'domain', ['limit'=>$limit,'exp_from'=>$fromDate,'exp_to'=>$toDate,'page'=>$page]);
-			if ($response === false) {
+            if ($response === false) {
 				$endPages = true;
 			} else {
-				if (!isset($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']) || !is_array($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'])) {
-					myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($response['xml_array']), __LINE__, __FILE__);
-					$endPages = true;
-				} else {
-					$domainArray = $response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item'];
-					$domainValues = array_values($response['xml_array']['body']['data_block']['dt_assoc']['item'][4]['dt_assoc']['item'][0]['dt_array']['item']);
-					foreach ($domainValues as $domainData) {
-						$domains[$domainData['dt_assoc']['item'][1]] = $domainData['dt_assoc']['item'][2];
-					}
-					if (sizeof($domainArray) < $limit) {
-						$endPages = true;
-					}
-				}
+                $found = false;
+                foreach ($response['xml_array']['body']['data_block']['dt_assoc']['item'] as $idx => $data) {
+                    if (is_array($data) && isset($data['dt_assoc']['item']) && is_array($data['dt_assoc']['item'])) {
+                        foreach ($data['dt_assoc']['item'] as $dataIdx => $domainParentData) {
+                            if (is_array($domainParentData) && isset($domainParentData['dt_array']['item']) && is_array($domainParentData['dt_array']['item'])) {
+                                $found = true;
+                                foreach ($domainParentData['dt_array']['item'] as $domainIdx => $domainArray) {
+                                    $domainData = $domainArray['dt_assoc']['item'];
+                                    $domain = false;
+                                    $expire = false;
+                                    foreach ($domainData as $value) {
+                                        if (preg_match('/^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]$/uU', trim($value))) {
+                                            $expire = trim($value);
+                                        } elseif (!in_array(trim($value), ['Y','N'])) {
+                                            $domain = trim($value);
+                                        }
+                                    }
+                                    if ($domain !== false && $expire !== false) {
+                                        //echo "[{$page}] Adding Domains Entry {$domain} {$expire}\n";
+                                        $domains[$domain] = $expire;
+                                    }
+                                }
+                                if (count($domainParentData['dt_array']['item']) < $limit) {
+                                    $endPages = true;
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($found === false) {
+                    myadmin_log('domains', 'warning', __NAMESPACE__.'::'.__METHOD__.' returned '.json_encode($response['xml_array']), __LINE__, __FILE__);
+                    $endPages = true;
+                }
 			}
 		}
 		return $domains;
