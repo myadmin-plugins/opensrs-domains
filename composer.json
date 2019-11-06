@@ -22,8 +22,9 @@
 		"php": ">=5.0.0",
 		"ext-soap": "*",
 		"symfony/event-dispatcher": ">=2.8.26",
+		"opensrs/osrs-toolkit-php": "dev-master",        
 		"detain/myadmin-plugin-installer": "dev-master"
-    },
+	},
 	"require-dev": {
 		"phpunit/phpunit": "*",
 		"phpunit/phpunit-mock-objects": "*",
