@@ -643,10 +643,6 @@ class Plugin
 					$error .= '<br>'.get_domain_error_text($osrsHandler);
 				}
 				dialog('Domain Registration Error', nl2br($error), false, '{width: "auto"}');
-				$headers = '';
-				$headers .= 'MIME-Version: 1.0'.PHP_EOL;
-				$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
-				$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 				$subject = 'Error Registering Domain '.$serviceClass->getHostname();
 				$email = 'There was an error registering your domain '.$serviceClass->getHostname().'<br>
 <br>
@@ -663,8 +659,8 @@ and then contact support@interserver.net to have them try the domain registratio
 <br>
 Interserver, Inc.<br>
 ';
-				multi_mail($serviceClass->getEmail(), $subject, $email, $headers, 'admin/domain_error.tpl');
-				//admin_mail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, TRUE)), $headers, FALSE, 'admin/domain_error.tpl');
+				multi_mail($serviceClass->getEmail(), $subject, $email, false, 'admin/domain_error.tpl');
+				//(new MyAdmin\Mail())->adminMail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, $headers, FALSE, 'admin/domain_error.tpl');
 				myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$serviceClass->setStatus('pending');
 				myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
