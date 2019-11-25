@@ -659,7 +659,7 @@ and then contact support@interserver.net to have them try the domain registratio
 <br>
 Interserver, Inc.<br>
 ';
-				multi_mail($serviceClass->getEmail(), $subject, $email, false, 'admin/domain_error.tpl');
+				(new \MyAdmin\Mail())->multiMail($subject, $email, $serviceClass->getEmail(), 'admin/domain_error.tpl');
 				//(new \MyAdmin\Mail())->adminMail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, $headers, FALSE, 'admin/domain_error.tpl');
 				myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$serviceClass->setStatus('pending');
