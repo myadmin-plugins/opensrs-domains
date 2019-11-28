@@ -202,7 +202,13 @@ class OpenSRS
 			$info = $e->getInfo();
 			$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 			myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage().':'.$info, __LINE__, __FILE__);
-			add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
+			if ($e->getMessage() == 'oSRS Error Code #480: Domain not found.') {
+				if ($GLOBALS['tf']->ima == 'admin') {
+					add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
+				}
+			} else {
+				add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
+			}
 			\StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
 			return false;
 		} catch (\opensrs\Exception $e) {
