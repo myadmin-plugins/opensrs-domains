@@ -590,9 +590,9 @@ class Plugin
 							} catch (\opensrs\Exception $e) {
 								myadmin_log('opensrs', 'error', $callString.':'.$e->getMessage(), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							}
-							request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $osrsHandler);
+							request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, isset($osrsHandler) ? $osrsHandler : null);
 							myadmin_log('opensrs', 'info', ' In: '.$callString.'<br>', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-							myadmin_log('opensrs', 'info', 'Out:'.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+							myadmin_log('opensrs', 'info', 'Out:'.isset($osrsHandler) ? json_encode($osrsHandler) : null, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								if ($osrsHandler->resultFullRaw['is_success'] == 1) {
 									$orderId = $osrsHandler->resultFullRaw['attributes']['order_id'];
