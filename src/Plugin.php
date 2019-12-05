@@ -382,6 +382,9 @@ class Plugin
 						'custom_transfer_nameservers' => 0
 					]
 				];
+				if (isset($extra['auth_info']) && trim($extra['auth_info']) != '') {
+					$callArray['data']['auth_info'] = $extra['auth_info'];
+				}				
 				if (trim($serviceClass->getFax()) != '') {
 					$callArray['fax'] = $serviceClass->getFax();
 				}
