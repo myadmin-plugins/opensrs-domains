@@ -243,10 +243,9 @@ class Plugin
 			$error = false;
 			if ($renew === true) {
 				$formFormat = 'json';
-				$formFunction = 'provRenew';
-				//$callString = "";
 				$callArray = [
-					'func' => 'provRenew', 'attributes' => [
+					'func' => 'provRenew', 
+					'attributes' => [
 						'auto_renew' => '0',
 						'currentexpirationyear' => $expireyear,
 						'domain' => $serviceClass->getHostname(),
@@ -292,8 +291,6 @@ class Plugin
 			} else {
 				// else new registration
 				$formFormat = 'json';
-				$formFunction = 'provSWregister';
-				//$callString = "";
 				$company = $serviceClass->getCompany();
 				if (trim($company) == '') {
 					$company = $serviceClass->getHostname();
@@ -336,98 +333,128 @@ class Plugin
 				$country = convert_country_iso2($serviceClass->getCountry());
 				$callArray = [
 					'func' => 'provSWregister',
-					'personal' => [
-						'first_name' => $serviceClass->getFirstname(),
-						'last_name' => $serviceClass->getLastname(),
-						'org_name' => $company,
-						'address1' => $serviceClass->getAddress(),
-						'address2' => $serviceClass->getAddress2(),
-						'address3' => $serviceClass->getAddress3(),
-						'city' => $serviceClass->getCity(),
-						'state' => $serviceClass->getState(),
-						'postal_code' => str_replace(' ', '', $serviceClass->getZip()),
-						'country' => $country,
-						'phone' => $phone,
-						'email' => $serviceClass->getEmail(),
-						'url' => 'http://www.'.$serviceClass->getHostname(),
-						'lang_pref' => 'EN'
-					],
-					'data' => [
-						'reg_username' => $username,
-						'reg_password' => $password,
+					'attributes' => [
 						'auto_renew' => '0',
-						'domain' => $serviceClass->getHostname(),
-						'reg_type' => 'new',
-						'period' => '1',
+						'contact_set' => [
+							'owner' => [
+								'first_name' => $serviceClass->getFirstname(),
+								'last_name' => $serviceClass->getLastname(),
+								'org_name' => $company,
+								'address1' => $serviceClass->getAddress(),
+								'address2' => $serviceClass->getAddress2(),
+								'address3' => $serviceClass->getAddress3(),
+								'city' => $serviceClass->getCity(),
+								'state' => $serviceClass->getState(),
+								'postal_code' => str_replace(' ', '', $serviceClass->getZip()),
+								'country' => $country,
+								'phone' => $phone,
+								'email' => $serviceClass->getEmail(),
+								'url' => 'http://www.'.$serviceClass->getHostname(),
+								'lang_pref' => 'EN'
+							]
+						],
 						'custom_tech_contact' => '1',
+						'custom_transfer_nameservers' => 0,
 						'custom_nameservers' => 1,
-						'name1' => $dns1,
-						'sortorder1' => '1',
-						'name2' => $dns2,
-						'sortorder2' => '2',
-						'name3' => $dns3,
-						'sortorder3' => '3',
-						/* optional start  */
-						'reg_domain' => '',
-						'affiliate_id' => '',
+						'domain' => $serviceClass->getHostname(),
 						'f_parkp' => 'N',
-						//"f_whois_privacy" => "1",
 						'f_whois_privacy' => '0',
 						'f_lock_domain' => '0',
+						'handle' => 'save',
 						'link_domains' => '0',
-						'encoding_type' => '',
-						'change_contact' => '',
-						'master_order_id' => '',
-						'handle' => '',
-						'custom_transfer_nameservers' => 0
-					]
-				];
+						'nameserver_list' => [
+							['name' => $dns1, 'sortorder' => 1], 
+							['name' => $dns2, 'sortorder' => 2], 
+							['name' => $dns3, 'sortorder' => 3] 
+						],
+						'period' => '1',
+						'reg_username' => $username,
+						'reg_password' => $password,
+						'reg_type' => 'new',
+				]];
 				if (isset($extra['auth_info']) && trim($extra['auth_info']) != '') {
-					$callArray['data']['auth_info'] = $extra['auth_info'];
+					$callArray['attributes']['auth_info'] = $extra['auth_info'];
 				}				
 				if (trim($serviceClass->getFax()) != '') {
-					$callArray['fax'] = $serviceClass->getFax();
+					$callArray['attributes']['contact_set']['owner']['fax'] = $serviceClass->getFax();
 				}
-				if (in_array($serviceTld, ['.abogado', '.aero', '.asia', '.cl', '.co.hu', '.com.au', '.com.ar', '.com.br', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fr', '.hk', '.hu', '.it', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pro', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.uk', '.us', '.wf', '.xxx', '.yt'])) {
-					$callArray['data']['tld_data'] = [];
+				if ($callArray['attributes']['reg_type'] == 'premium') {
+					$callArray['attributes']['premium_price_to_verify'] = '';
+				}
+				if (isset($extra['transfer']) && $extra['transfer'] == 'yes') {
+					$callArray['attributes']['custom_nameservers'] = '0';
+					$callArray['attributes']['reg_type'] = 'transfer';
+					myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					//if ($serviceTld == '.com.ph')
+					//	$callArray['attributes']['period'] = 0;
+				} else {
+					myadmin_log('opensrs', 'info', 'Transfer: NO', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+				}
+				if ($serviceTld == '.eu') {
+					$callArray['attributes']['custom_transfer_nameservers'] = '1';
+				}
+				//if ($serviceTld == '.fr')
+				//	$callArray['attributes']['registrant_extra_info'] = $callArray['registrant_extra_info'];
+				if (in_array($serviceTld, ['.eu', '.be', '.de'])) {
+					//$callArray['personal']['entity_type'] = 2;
+					$callArray['attributes']['eu_country'] = $extra['domain_country'];
+					$callArray['attributes']['lang'] = $extra['lang'];
+					$callArray['attributes']['owner_confirm_address'] = $extra['owner_confirm_address'];
+					//$callArray['attributes']["owner_confirm_address"] = $callArray['personal']['email'];
+				}
+				if ($serviceTld == '.ca') {
+					$callArray['attributes']['ca_link_domain'] = (isset($extra['ca_link_domain']) ? $extra['ca_link_domain'] : '');
+					$callArray['attributes']['cwa'] = (isset($extra['cwa']) ? $extra['cwa'] : '');
+					$callArray['attributes']['domain_description'] = (isset($extra['domain_description']) ? $extra['domain_description'] : '');
+					$callArray['attributes']['isa_trademark'] = (isset($extra['isa_trademark']) ? $extra['isa_trademark'] : 'N');
+					$callArray['attributes']['lang_pref'] = (isset($extra['lang_pref']) ? $extra['lang_pref'] : 'EN');
+					$callArray['attributes']['legal_type'] = (isset($extra['legal_type']) ? $extra['legal_type'] : 'CCT');
+					$callArray['attributes']['rant_agrees'] = (isset($extra['rant_agrees']) ? $extra['rant_agrees'] : '');
+					$callArray['attributes']['rant_no'] = (isset($extra['rant_no']) ? $extra['rant_no'] : '');
+				}
+				if ($serviceTld == '.tel') {
+					$callArray['attributes']['custom_nameservers'] = 0;
+				}
+				if (in_array($serviceTld, ['.abogado','.aero','.asia','.asn.au','.au','.cl','.co.hu','.co.za','.com.ar','.com.au','.com.br','.com.lv','.com.mx','.com.pt','.com.ro','.coop','.de','.dk','.es','.fr','.hk','.hu','.id.au','.it','.jobs','.law','.lv','.mx','.my','.name','.net.au','.no','.nu','.nyc','.org.au','.pm','.pro','.pt','.re','.ro','.ru','.se','.sg','.tf','.travel','.uk','.us','.wf','.xxx','.yt'])) {
+					$callArray['attributes']['tld_data'] = [];
 					if (in_array($serviceTld, ['.abogado', '.aero', '.cl', '.co.hu', '.com.ar', '.com.lv', '.com.mx', '.com.pt', '.com.ro', '.coop', '.co.za', '.de', '.dk', '.es', '.fi.', '.fr', '.hk', '.hu', '.jobs', '.law', '.lv', '.mx', '.my', '.no', '.nu', '.nyc', '.pm', '.pt', '.re', '.ro', '.ru', '.se', '.sg', '.tf', '.travel', '.wf', '.yt'])) {
-						$callArray['data']['tld_data']['registrant_extra_info'] = [];
+						$callArray['attributes']['tld_data']['registrant_extra_info'] = [];
 						//.nu
 						if (in_array($serviceTld, ['.nu', '.hu', '.co.hu', '.se'])) {
 							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							if (isset($extra['registrant_type'])) {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							} else {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
 							}
-							if ($callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] == 'individual') {
-								$callArray['data']['tld_data']['registrant_extra_info']['id_card_number'] = $extra['id_card_number'];
+							if ($callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] == 'individual') {
+								$callArray['attributes']['tld_data']['registrant_extra_info']['id_card_number'] = $extra['id_card_number'];
 							} else {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_vat_id'] = $extra['registrant_vat_id'];
-								$callArray['data']['tld_data']['registrant_extra_info']['registration_number'] = $extra['registration_number'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_vat_id'] = $extra['registrant_vat_id'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registration_number'] = $extra['registration_number'];
 							}
 						}
 						//.hk .ru
 						if (in_array($serviceTld, ['.hk', '.ru'])) {
 							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							if (isset($extra['registrant_type'])) {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							} else {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
 							}
-							if ($callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] == 'individual') {
-								$callArray['data']['tld_data']['registrant_extra_info']['id_card_number'] = $extra['id_card_number'];
-								$callArray['data']['tld_data']['registrant_extra_info']['date_of_birth'] = $extra['date_of_birth'];
+							if ($callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] == 'individual') {
+								$callArray['attributes']['tld_data']['registrant_extra_info']['id_card_number'] = $extra['id_card_number'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['date_of_birth'] = $extra['date_of_birth'];
 							} else {
-								$callArray['data']['tld_data']['registrant_extra_info']['registration_number'] = $extra['registration_number'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registration_number'] = $extra['registration_number'];
 							}
 						}
 						if (in_array($serviceTld, ['.nyc'])) {
 							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							if (isset($extra['registrant_type'])) {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = $extra['registrant_type'];
 							} else {
-								$callArray['data']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
+								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
 							}
 						}
 						if (in_array($serviceTld, ['.fr'])) {
@@ -446,11 +473,28 @@ class Plugin
 									$extraInfo['postal_code_of_birth'] = $extra['country_of_birth'];
 								}
 							}
-							$callArray['data']['tld_data']['registrant_extra_info'] = $extraInfo;
+							$callArray['attributes']['tld_data']['registrant_extra_info'] = $extraInfo;
 						}
 					} else {
-						if ($serviceTld == '.com.au') {
+						if (in_array($serviceTld, ['.au', '.id.au', '.asn.au', '.net.au', '.org.au', '.com.au'])) {
 							$au_registrant_info = [
+								'policy_reason' => $extra['policy_reason'],
+								'registrant_id_type' => $extra['registrant_id_type'],
+								'registrant_id' => $extra['registrant_id'],
+								'registrant_name' => $extra['registrant_name']
+							];
+							if (in_array($serviceTld, ['.asn.au', '.net.au', '.org.au', '.com.au'])) {
+								$au_registrant_info['eligibility_id_type'] = $extra['eligibility_id_type'];
+								$au_registrant_info['eligibility_id'] = $extra['eligibility_id'];
+								$au_registrant_info['eligibility_name'] = $extra['eligibility_name'];
+							}
+							if (in_array($serviceTld, ['.com.au'])) {
+								$au_registrant_info['eligibility_type'] = $extra['eligibility_type'];
+							}
+							$callArray['attributes']['tld_data']['au_registrant_info'] = $au_registrant_info;
+						}
+						if ($serviceTld == '.com.au') {
+							$callArray['attributes']['tld_data']['au_registrant_info'] = [
 								'policy_reason' => $extra['policy_reason'],
 								'registrant_id_type' => $extra['registrant_id_type'],
 								'registrant_id' => $extra['registrant_id'],
@@ -460,11 +504,9 @@ class Plugin
 								'eligibility_name' => $extra['eligibility_name'],
 								'eligibility_type' => $extra['eligibility_type']
 							];
-							$callArray['data']['tld_data']['au_registrant_info'] = $au_registrant_info;
 						}
-						// .asia Domains
 						if ($serviceTld == '.asia') {
-							$callArray['data']['tld_data']['cedinfo'] = [
+							$callArray['attributes']['tld_data']['ced_info'] = [
 								'contact_type' => $extra['contact_type'],
 								'id_number' => $extra['id_number'],
 								'id_type' => $extra['id_type'],
@@ -475,67 +517,29 @@ class Plugin
 								'locality_country' => $extra['locality_country'],
 								'locality_state_prov' => $extra['locality_state_prov']];
 						}
-						// .us Domains
 						if ($serviceTld == '.us') {
-							$callArray['data']['tld_data']['nexus'] = [
+							$callArray['attributes']['tld_data']['nexus'] = [
 								'app_purpose' => $extra['app_purpose'],
 								'category' => $extra['category']
 							];
 							if (trim($extra['validator']) != '' && in_array($extra['category'], ['C31', 'C32'])) {
-								$callArray['data']['tld_data']['nexus']['validator'] = $extra['validator'];
+								$callArray['attributes']['tld_data']['nexus']['validator'] = $extra['validator'];
 							}
+						}
+						if ($serviceTld == '.pro') {
+							$callArray['attributes']['tld_data']['professional_data'] = ['profession' => 'Administrator'];
+						}
+						if ($serviceTld == '.it') {
+							$callArray['attributes']['tld_data']['it_registrant_info'] = ['entity_type' => $extra['entity_type'], 'reg_code' => $extra['reg_code']];
+						}
+						if ($serviceTld == '.name') {
+							$callArray['attributes']['tld_data']['registrant_extra_info'] = ['forwarding_email' => $extra['forwarding_email']];
 						}
 					}
 				}
-				if ($callArray['data']['reg_type'] == 'premium') {
-					$callArray['data']['premium_price_to_verify'] = '';
-				}
-				if (isset($extra['transfer']) && $extra['transfer'] == 'yes') {
-					$callArray['data']['custom_nameservers'] = '0';
-					$callArray['data']['reg_type'] = 'transfer';
-					myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				//if ($serviceTld == '.com.ph')
-	//						$callArray['data']['period'] = 0;
-				} else {
-					myadmin_log('opensrs', 'info', 'Transfer: NO', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				}
-				if ($serviceTld == '.eu') {
-					$callArray['data']['custom_transfer_nameservers'] = '1';
-				}
-				//if ($serviceTld == 'fr')
-				//$callArray['data']['registrant_extra_info'] = $callArray['registrant_extra_info'];
-				if (in_array($serviceTld, ['.eu', '.be', '.de'])) {
-					//$callArray['personal']['entity_type'] = 2;
-					$callArray['data']['eu_country'] = $extra['domain_country'];
-					$callArray['data']['lang'] = $extra['lang'];
-					$callArray['data']['owner_confirm_address'] = $extra['owner_confirm_address'];
-					//$callArray['data']["owner_confirm_address"] = $callArray['personal']['email'];
-				}
-				if ($serviceTld == '.ca') {
-					$callArray['data']['ca_link_domain'] = (isset($extra['ca_link_domain']) ? $extra['ca_link_domain'] : '');
-					$callArray['data']['cwa'] = (isset($extra['cwa']) ? $extra['cwa'] : '');
-					$callArray['data']['domain_description'] = (isset($extra['domain_description']) ? $extra['domain_description'] : '');
-					$callArray['data']['isa_trademark'] = (isset($extra['isa_trademark']) ? $extra['isa_trademark'] : 'N');
-					$callArray['data']['lang_pref'] = (isset($extra['lang_pref']) ? $extra['lang_pref'] : 'EN');
-					$callArray['data']['legal_type'] = (isset($extra['legal_type']) ? $extra['legal_type'] : 'CCT');
-					$callArray['data']['rant_agrees'] = (isset($extra['rant_agrees']) ? $extra['rant_agrees'] : '');
-					$callArray['data']['rant_no'] = (isset($extra['rant_no']) ? $extra['rant_no'] : '');
-				}
-				if ($serviceTld == '.tel') {
-					$callArray['data']['custom_nameservers'] = 0;
-					$callArray['data']['custom_nameservers'] = 0;
-				}
-				if ($serviceTld == '.pro') {
-					$callArray['professional_data'] = ['profession' => 'Administrator'];
-					$callArray['data']['professional_data'] = $callArray['professional_data'];
-				}
-				if ($serviceTld == '.it') {
-					$callArray['data']['tld_data']['it_registrant_info'] = ['entity_type' => $extra['entity_type'], 'reg_code' => $extra['reg_code']];
-				}
-				if ($serviceTld == '.name') {
-					$callArray['data']['forwarding_email'] = $extra['forwarding_email'];
-				}
-
+				$callArray['attributes']['contact_set']['admin'] = $callArray['attributes']['contact_set']['owner'];
+				$callArray['attributes']['contact_set']['billing'] = $callArray['attributes']['contact_set']['owner'];
+				$callArray['attributes']['contact_set']['tech'] = $callArray['attributes']['contact_set']['owner'];
 				//if ($formFormat == "array") $callString = $callArray;
 				//if ($formFormat == "json") $callString = json_encode($callArray);
 				//if ($formFormat == "yaml") $callString = Spyc::YAMLDump($callArray);
@@ -578,7 +582,11 @@ class Plugin
 
 						if (!isset($error) || $error === false) {
 							unset($osrsHandler);
-							$callArray = ['func' => 'provProcessPending', 'attributes' => ['order_id' => $orderId]];
+							$callArray = [
+								'func' => 'provProcessPending', 
+								'attributes' => [
+									'order_id' => $orderId
+							]];
 							$callString = json_encode($callArray);
 							try {
 								$request = new \opensrs\Request();
@@ -610,12 +618,12 @@ class Plugin
 							if ((!isset($error) || $error === false) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								$callString = '';
 								$callArray = [
-									'func' => 'nsAdvancedUpdt', 'attributes' => [
-									'domain' => $serviceClass->getHostname(),
-									'op_type' => 'assign',
-									'assign_ns' => $dns_array
-									]
-								];
+									'func' => 'nsAdvancedUpdt', 
+									'attributes' => [
+										'domain' => $serviceClass->getHostname(),
+										'op_type' => 'assign',
+										'assign_ns' => $dns_array
+								]];
 								$callString = json_encode($callArray);
 								try {
 									$request = new \opensrs\Request();
