@@ -318,6 +318,9 @@ class Plugin
 						if (preg_match("/^webhosting(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
 							$dns1 = 'dns'.$matches['id'].'a.trouble-free.net';
 							$dns2 = 'dns'.$matches['id'].'b.trouble-free.net';
+						} elseif (preg_match("/^wordpress(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
+							$dns1 = 'dnswordpress'.$matches['id'].'a.trouble-free.net';
+							$dns2 = 'dnswordpress'.$matches['id'].'b.trouble-free.net';
 						} else {
 							$dns1 = 'dns.trouble-free.net';
 							$dns2 = 'dns2.trouble-free.net';
