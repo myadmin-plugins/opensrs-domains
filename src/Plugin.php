@@ -259,24 +259,27 @@ class Plugin
 				//if ($formFormat == "yaml") $callString = Spyc::YAMLDump($callArray);
 				$callString = json_encode($callArray);
 				// Open SRS Call -> Result
+				myadmin_log('opensrs', 'info', 'In: '.$callString.'<br>', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				try {
 					$request = new \opensrs\Request();
 					$osrsHandler = $request->process($formFormat, $callString);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $osrsHandler);
+					myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} catch (\opensrs\APIException $e) {
 					$error = $e->getMessage();
-					$errorMessage = $e->getMessage();
 					$info = $e->getInfo();
 					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
-					myadmin_log('opensrs', 'error', $callString.':'.$errorMessage.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					//add_output($errorMessage.':'.$info.'<br>');
+					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					//add_output($error.':'.$info.'<br>');
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info);
 				} catch (\opensrs\Exception $e) {
-					myadmin_log('opensrs', 'error', $callString.':'.$e->getMessage(), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					$error = $e->getMessage();
+					$info = $e->getInfo();
+					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
+					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					//add_output($error.':'.$info.'<br>');
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info);
 				}
-				request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $osrsHandler);
-				// Print out the results
-				myadmin_log('opensrs', 'info', 'In: '.$callString.'<br>', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler->resultFullRaw), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				//myadmin_log('opensrs', 'info', "Out: ". $osrsHandler->resultFullFormatted, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 					$extra['order'] = obj2array($osrsHandler->resultFullRaw);
 					if ($osrsHandler->resultFullRaw['is_success'] == 1) {
