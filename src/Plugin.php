@@ -263,7 +263,7 @@ class Plugin
 				try {
 					$request = new \opensrs\Request();
 					$osrsHandler = $request->process($formFormat, $callString);
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $osrsHandler);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $osrsHandler, $serviceClass->getId());
 					myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} catch (\opensrs\APIException $e) {
 					$error = $e->getMessage();
@@ -271,14 +271,14 @@ class Plugin
 					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					//add_output($error.':'.$info.'<br>');
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info, $serviceClass->getId());
 				} catch (\opensrs\Exception $e) {
 					$error = $e->getMessage();
 					$info = $e->getInfo();
 					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					//add_output($error.':'.$info.'<br>');
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provRenew', $callString, $error.':'.$info, $serviceClass->getId());
 				}
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 					$extra['order'] = obj2array($osrsHandler->resultFullRaw);
@@ -559,7 +559,7 @@ class Plugin
 				try {
 					$request = new \opensrs\Request();
 					$osrsHandler = $request->process($formFormat, $callString);
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $osrsHandler);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $osrsHandler, $serviceClass->getId());
 					myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				} catch (\opensrs\APIException $e) {
 					$error = $e->getMessage();
@@ -567,14 +567,14 @@ class Plugin
 					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					//add_output($error.':'.$info.'<br>');
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $error.':'.$info);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $error.':'.$info, $serviceClass->getId());
 				} catch (\opensrs\Exception $e) {
 					$error = $e->getMessage();
 					$info = $e->getInfo();
 					$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 					myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					//add_output($error.':'.$info.'<br>');
-					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $error.':'.$info);
+					request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provSWregister', $callString, $error.':'.$info, $serviceClass->getId());
 				}
 				/*
 				$arr = obj2array($osrsHandler->resultFullRaw);
@@ -600,7 +600,7 @@ class Plugin
 							try {
 								$request = new \opensrs\Request();
 								$osrsHandler = $request->process('json', $callString);
-								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $osrsHandler);
+								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $osrsHandler, $serviceClass->getId());
 								myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							} catch (\opensrs\APIException $e) {
 								$error = $e->getMessage();
@@ -608,14 +608,14 @@ class Plugin
 								$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 								myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 								//add_output($error.':'.$info.'<br>');
-								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $error.':'.$info);
+								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $error.':'.$info, $serviceClass->getId());
 							} catch (\opensrs\Exception $e) {
 								$error = $e->getMessage();
 								$info = $e->getInfo();
 								$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 								myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 								//add_output($error.':'.$info.'<br>');
-								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $error.':'.$info);
+								request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'provProcessPending', $callString, $error.':'.$info, $serviceClass->getId());
 							}
 							if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								if ($osrsHandler->resultFullRaw['is_success'] == 1) {
@@ -642,7 +642,7 @@ class Plugin
 								try {
 									$request = new \opensrs\Request();
 									$osrsHandler = $request->process('json', $callString);
-									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $osrsHandler);
+									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $osrsHandler, $serviceClass->getId());
 									myadmin_log('opensrs', 'info', 'Out: '.json_encode($osrsHandler), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 								} catch (\opensrs\APIException $e) {
 									$error = $e->getMessage();
@@ -650,14 +650,14 @@ class Plugin
 									$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 									myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 									//add_output($error.':'.$info.'<br>');
-									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $error.':'.$info);
+									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $error.':'.$info, $serviceClass->getId());
 								} catch (\opensrs\Exception $e) {
 									$error = $e->getMessage();
 									$info = $e->getInfo();
 									$info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
 									myadmin_log('opensrs', 'error', $callString.':'.$error.':'.$info, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 									//add_output($error.':'.$info.'<br>');
-									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $error.':'.$info);
+									request_log('domains', $serviceClass->getCustid(), __FUNCTION__, 'opensrs', 'nsAdvancedUpdt', $callString, $error.':'.$info, $serviceClass->getId());
 								}
 							}
 						}
