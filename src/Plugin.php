@@ -672,7 +672,7 @@ class Plugin
 				if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && isset($osrsHandler->resultFullRaw['response_text'])) {
 					$error .= '<br>'.get_domain_error_text($osrsHandler);
 				}
-				dialog('Domain Registration Error', nl2br($error), false, '{width: "auto"}');
+				//dialog('Domain Registration Error', nl2br($error), false, '{width: "auto"}');
 				$subject = 'Error Registering Domain '.$serviceClass->getHostname();
 				$email = 'There was an error registering your domain '.$serviceClass->getHostname().'<br>
 <br>
