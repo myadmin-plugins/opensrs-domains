@@ -183,7 +183,6 @@ class Plugin
 			$serviceTld = $serviceInfo['services_field1'];
 			$extra = parse_domain_extra($serviceClass->getExtra());
 			//myadmin_log('domains', 'info', json_encode($extra), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-
 			$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupGetDomain($serviceClass->getHostname(), 'all_info');
 			if ($response !== false && isset($response['attributes']['expiredate'])) {
 				$expiry_full_date = $response['attributes']['expiredate'];
@@ -388,11 +387,23 @@ class Plugin
 					$callArray['attributes']['premium_price_to_verify'] = '';
 				}
 				if (isset($extra['transfer']) && $extra['transfer'] == 'yes') {
-					$callArray['attributes']['custom_nameservers'] = '0';
-					$callArray['attributes']['reg_type'] = 'transfer';
-					myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					//if ($serviceTld == '.com.ph')
-					//	$callArray['attributes']['period'] = 0;
+					$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupDomain($serviceClass->getHostname());
+					if ($response !== false) {
+						if (isset($response['attributes']['status']) && $response['attributes']['status'] == 'available') {
+							$available = true;
+						} elseif (isset($response['attributes']['status']) && $response['attributes']['status'] == 'taken') {
+							$available = false;
+						}
+					}
+					if (!isset($available) || $available === false) {
+						$callArray['attributes']['custom_nameservers'] = '0';
+						$callArray['attributes']['reg_type'] = 'transfer';
+						myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+						//if ($serviceTld == '.com.ph')
+						//	$callArray['attributes']['period'] = 0;
+					} else {
+						myadmin_log('opensrs', 'info', 'Transfer: YES but domain check came back available so forcing NO', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					}
 				} else {
 					myadmin_log('opensrs', 'info', 'Transfer: NO', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				}
