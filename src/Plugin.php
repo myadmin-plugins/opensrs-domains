@@ -703,7 +703,7 @@ Interserver, Inc.<br>
 				(new \MyAdmin\Mail())->multiMail($subject, $email, $serviceClass->getEmail(), 'admin/domain_error.tpl');
 				//(new \MyAdmin\Mail())->adminMail($subject, $subject . "<br>" . nl2br(print_r($osrsHandler->resultFullRaw, $headers, FALSE, 'admin/domain_error.tpl');
 				myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				$serviceClass->setStatus('pending');
+				$serviceClass->setStatus('pending')->save();
 				myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				return false;
 			}
