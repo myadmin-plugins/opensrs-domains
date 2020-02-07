@@ -25,6 +25,7 @@ class OpenSRS
 	public $osrsHandlerAllInfo;
 	public $osrsHandlerWhoisPrivacy;
 	public $osrsHandlerStatus;
+	public $osrsHandlerDnssec;
 	public $locked;
 	public $registrarStatus;
 	public $whoisPrivacy;
@@ -360,8 +361,8 @@ class OpenSRS
 				'domain' => $this->serviceInfo['domain_hostname'],
 				'type' => 'dnssec'
 		]];
-		$this->osrsHandlerStatus = self::request($callstring);
-		$this->dnssec = $this->osrsHandlerStatus->resultFullRaw['attributes']['dnssec'];
+		$this->osrsHandlerDnssec = self::request($callstring);
+		$this->dnssec = $this->osrsHandlerDnssec->resultFullRaw['attributes']['dnssec'];
 		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
 		$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
 	}
