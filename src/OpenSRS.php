@@ -353,6 +353,14 @@ class OpenSRS
 		]];
 		$this->osrsHandlerStatus = self::request($callstring);
 		$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
+		$callstring = [
+			'func' => 'lookupGetDomain',
+			'attributes' => [
+				'domain' => $this->serviceInfo['domain_hostname'],
+				'type' => 'dnssec'
+		]];
+		$this->osrsHandlerStatus = self::request($callstring);
+		$this->dnssec = $this->osrsHandlerStatus->resultFullRaw['attributes']['dnssec'];
 		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
 		$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
 	}
