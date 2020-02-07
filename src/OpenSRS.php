@@ -29,6 +29,7 @@ class OpenSRS
 	public $registrarStatus;
 	public $whoisPrivacy;
 	public $expiryDate;
+	public $dnssec;
 	public $module = 'domains';
 	public $settings;
 	public $serviceInfo;
