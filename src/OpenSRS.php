@@ -229,7 +229,7 @@ class OpenSRS
 	 * @param string $object
 	 * @param string $options
 	 */
-	public static function xmlRequest($action, $object, $options)
+	public static function xmlRequest($action, $object, $options, $extra = null)
 	{
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
@@ -244,7 +244,14 @@ class OpenSRS
 			<dt_assoc>
 				<item key="protocol">XCP</item>
 				<item key="action">'.$action.'</item>
-				<item key="object">'.$object.'</item>
+				<item key="object">'.$object.'</item>';
+				if (!is_null($extra)) {
+					foreach ($extra as $key => $value) {
+						$xml .= '
+				<item key="'.$key.'">'.$value.'</item>';
+					}
+				}
+				$xml .= '
 				<item key="attributes">
 					<dt_assoc>';
 		foreach ($options as $key => $value) {
