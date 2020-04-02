@@ -241,7 +241,6 @@ class Plugin
 			}
 			$error = false;
 			if ($renew === true) {
-				$period = $serviceTld == '.com.au' ? 0 : 1;
 				$formFormat = 'json';
 				$callArray = [
 					'func' => 'provRenew', 
@@ -251,7 +250,7 @@ class Plugin
 						'domain' => $serviceClass->getHostname(),
 						'f_parkp' => 'N',
 						'handle' => 'process',
-						'period' => $period,
+						'period' => 1,
 					]
 				];
 				//if ($formFormat == "array") $callString = $callArray;
@@ -400,6 +399,9 @@ class Plugin
 						myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						//if ($serviceTld == '.com.ph')
 						//	$callArray['attributes']['period'] = 0;
+						if ($serviceTld == '.com.au') {
+							$callArray['attributes']['period'] = 0;
+						}
 					} else {
 						myadmin_log('opensrs', 'info', 'Transfer: YES but domain check came back available so forcing NO', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 					}
