@@ -229,7 +229,7 @@ class OpenSRS
 	 * @param string $object
 	 * @param string $options
 	 */
-	public static function xmlRequest($action, $object, $options)
+	public static function xmlRequest($action, $object, $options, $extra = null)
 	{
 		$username = OPENSRS_USERNAME;
 		$privateKey = OPENSRS_KEY;
@@ -244,7 +244,14 @@ class OpenSRS
 			<dt_assoc>
 				<item key="protocol">XCP</item>
 				<item key="action">'.$action.'</item>
-				<item key="object">'.$object.'</item>
+				<item key="object">'.$object.'</item>';
+				if (!is_null($extra)) {
+					foreach ($extra as $key => $value) {
+						$xml .= '
+				<item key="'.$key.'">'.$value.'</item>';
+					}
+				}
+				$xml .= '
 				<item key="attributes">
 					<dt_assoc>';
 		foreach ($options as $key => $value) {
@@ -339,7 +346,6 @@ class OpenSRS
 				'min_to_expiry' => ''
 		]];
 		$this->osrsHandlerWhoisPrivacy = self::request($callstring);
-		$this->whoisPrivacy = $this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']['state'];
 		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
@@ -354,7 +360,6 @@ class OpenSRS
 				'min_to_expiry' => ''
 		]];
 		$this->osrsHandlerStatus = self::request($callstring);
-		$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
 		$callstring = [
 			'func' => 'lookupGetDomain',
 			'attributes' => [
@@ -362,9 +367,16 @@ class OpenSRS
 				'type' => 'dnssec'
 		]];
 		$this->osrsHandlerDnssec = self::request($callstring);
-		$this->dnssec = $this->osrsHandlerDnssec->resultFullRaw['attributes']['dnssec'];
-		$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
-		$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
+		if (isset($this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']))
+			$this->whoisPrivacy = $this->osrsHandlerWhoisPrivacy->resultFullRaw['attributes']['state'];
+		if (isset($this->osrsHandlerStatus->resultFullRaw['attributes']))
+			$this->locked = $this->osrsHandlerStatus->resultFullRaw['attributes']['lock_state'];
+		if (isset($this->osrsHandlerDnssec->resultFullRaw['attributes']))
+			$this->dnssec = $this->osrsHandlerDnssec->resultFullRaw['attributes']['dnssec'];
+		if (isset($this->osrsHandlerAllInfo->resultFullRaw['attributes'])) {
+			$this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
+			$this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
+		}
 	}
 
 	/**
