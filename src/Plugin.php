@@ -241,6 +241,7 @@ class Plugin
 			}
 			$error = false;
 			if ($renew === true) {
+				$period = $serviceTld == '.com.au' ? 0 : 1;
 				$formFormat = 'json';
 				$callArray = [
 					'func' => 'provRenew', 
@@ -250,7 +251,7 @@ class Plugin
 						'domain' => $serviceClass->getHostname(),
 						'f_parkp' => 'N',
 						'handle' => 'process',
-						'period' => '1'
+						'period' => $period,
 					]
 				];
 				//if ($formFormat == "array") $callString = $callArray;
