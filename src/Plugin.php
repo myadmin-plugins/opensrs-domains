@@ -475,6 +475,15 @@ class Plugin
 								$callArray['attributes']['tld_data']['registrant_extra_info']['registrant_type'] = 'individual';
 							}
 						}
+						if (in_array($serviceTld, ['.aero'])) {
+							myadmin_log('opensrs', 'info', 'adding aero_ens_id / aero_ens_password', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+							if (isset($extra['aero_ens_id'])) {
+								$callArray['attributes']['tld_data']['registrant_extra_info']['aero_ens_id'] = $extra['aero_ens_id'];
+							}
+							if (isset($extra['aero_ens_password'])) {
+								$callArray['attributes']['tld_data']['registrant_extra_info']['aero_ens_password'] = $extra['aero_ens_password'];
+							}
+						}
 						if (in_array($serviceTld, ['.fr'])) {
 							myadmin_log('opensrs', 'info', 'adding registrant type', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 							$extraInfo = [];
