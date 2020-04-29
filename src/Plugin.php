@@ -520,6 +520,9 @@ class Plugin
 							}
 							$callArray['attributes']['tld_data']['au_registrant_info'] = $au_registrant_info;
 						}
+						if ($serviceTld == '.com.br') {
+							$callArray['attributes']['tld_data']['br_register_number'] = $extra['br_register_number'];
+						}
 						if ($serviceTld == '.com.au') {
 							$callArray['attributes']['tld_data']['au_registrant_info'] = [
 								'policy_reason' => $extra['policy_reason'],
