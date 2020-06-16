@@ -218,6 +218,7 @@ class Plugin
 				}
 			}
 			if ($renew === false) {
+				$dbC = clone $db;
 				$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
 				$db->next_record();
 				if ($db->Record['invoices_amount'] == '1.99') {
@@ -225,6 +226,7 @@ class Plugin
 					if ($db->num_rows() == 0) {
 						dialog('Failed', 'Something went wrong. Please contact support team.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
 						return false;
 					}
 					$website_active = false;
@@ -235,6 +237,7 @@ class Plugin
 					if ($website_active == false) {
 						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
 						return false;
 					}
 				}
