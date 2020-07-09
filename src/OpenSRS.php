@@ -528,9 +528,10 @@ class OpenSRS
 	 *
 	 * @param string $domain the domain name to lookup	 *
 	 * @param string $type Type of query. Allowed values are: 'admin—Returns' - admin contact information.	  'all_info' - Returns all information. 'auto_renew_flag' - Deprecated, Returned list of domains. 'billing' - Returns billing contact information. 'ca_whois_display_setting' - Returns the current CIRA Whois Privacy setting for .CA domains. 'domain_auth_info' ' - Returns domain authorization code, if applicable. 'expire_action' Returns the action to be taken upon domain expiry, specifically whether to auto-renew the domain, or let it expire silently. 'forwarding_email' - Returns forwarding email for .NAME 2nd level. 'it_whois_display_setting' - Returns the current Whois Privacy setting for .IT domains. 'list' - Returns list of domains for user. 'nameservers' - Returns nameserver information. 'owner' - Returns owner contact information. 'rsp_whois_info' - Returns name and contact information for RSP. 'status' - Returns lock or escrow status of the domain. 'tech' - Returns tech contact information. 'tld_data' - Returns additional information that is required by some registries, such as the residency of the registrant. 'trademark' - Deprecated. Used for .CA domains; returns 'Y' or 'N' value indicating whether the registered owner of the domain name is the legal holder of the trademark for that word. 'waiting history' - Returns information on asynchronous requests. 'whois_privacy_state ' - Returns the state for the WHOIS Privacy feature: enabled, disabled, enabling, or disabling. Note: If the TLD does not allow WHOIS Privacy, always returns Disabled. 'xpack_waiting_history' - Returns the state of completed/cancelled requests not yet deleted from the database for .DK domains. All completed/cancelled requests are deleted from the database two
+     * @param false|int $limit optional limit
 	 * @return array|bool
 	 */
-	public static function lookupGetDomain($domain, $type = 'all_info')
+	public static function lookupGetDomain($domain, $type = 'all_info', $limit = false)
 	{
 		$callstring = [
 			'func' => 'lookupGetDomain',
@@ -539,11 +540,13 @@ class OpenSRS
 				'type' => $type,
 				'bypass' => '',
 				'registrant_ip' => '',
-				//'limit' => '10',
 				'page' => '',
 				'max_to_expiry' => '',
 				'min_to_expiry' => ''
 		]];
+        if ($limit !== false) {
+            $callstring['attributes']['limit'] = $limit;
+        }
 		$osrsHandler = self::request($callstring);
 		if ($osrsHandler === false) {
 			return false;
