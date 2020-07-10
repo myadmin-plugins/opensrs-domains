@@ -231,12 +231,13 @@ class Plugin
 					}
 					$website_active = false;
 					while ($db->next_record(MYSQL_ASSOC)) {
+                        $website_id = $db->Record['website_id'];
 						if ($db->Record['website_status'] == 'active')
 							$website_active = true;
 					}
 					if ($website_active == false) {
-						dialog('Failed', 'Kindly make payment of website '.$db->Record['website_id'].' you ordered along with this domain.');
-						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$db->Record['website_id']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+						dialog('Failed', 'Kindly make payment of website '.$website_id.' you ordered along with this domain.');
+						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$website_id}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
 						return false;
 					}
