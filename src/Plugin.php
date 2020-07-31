@@ -221,11 +221,11 @@ class Plugin
 				$dbC = clone $db;
 				$db->query("SELECT * FROM invoices WHERE invoices_service = $id AND invoices_module = 'domains' AND invoices_type = 1 ORDER BY invoices_date DESC LIMIT 1");
 				$db->next_record();
-				if ($db->Record['invoices_amount'] == '1.99') {
+				if ($db->Record['invoices_amount'] == '1.99' || $db->Record['invoices_amount'] == '7.99') {
 					$db->query("SELECT * FROM websites WHERE website_hostname = '".$db->real_escape($serviceClass->getHostname())."'");
 					if ($db->num_rows() == 0) {
 						dialog('Failed', 'Something went wrong. Please contact support team.');
-						myadmin_log('opensrs', 'info', "Customer trying to register domain for $1.99 without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+						myadmin_log('opensrs', 'info', "Customer trying to register domain for {$db->Record['invoices_amount']} without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
 						return false;
 					}
