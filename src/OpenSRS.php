@@ -433,13 +433,27 @@ class OpenSRS
 	 */
 	public static function createNameserverRaw($cookie, $hostname, $ip, $useDomain = false)
 	{
-		$callstring = [
-			'func' => 'nsCreate',
-			'attributes' => [
-				$useDomain === false ? 'cookie' : 'domain' => $cookie,
-				'name' => $hostname,
-				'ipaddress' => $ip
-		]];
+		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+			$callstring = [
+				'func' => 'nsCreate',
+				'attributes' => [
+					$useDomain === false ? 'cookie' : 'domain' => $cookie,
+					'name' => $hostname,
+					'ipv6' => $ip
+			]];
+		} elseif (filter_var($ip, FILTER_VALIDATE_IP)) {
+			$callstring = [
+				'func' => 'nsCreate',
+				'attributes' => [
+					$useDomain === false ? 'cookie' : 'domain' => $cookie,
+					'name' => $hostname,
+					'ipaddress' => $ip
+			]];
+		} else {
+			//InvalidIp
+			return false;
+		}
+		
 		//echo "Call String: $callstring\n<br>";
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && $osrsHandler->resultFullRaw['is_success'] == 1) {
