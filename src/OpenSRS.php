@@ -440,7 +440,6 @@ class OpenSRS
 					$useDomain === false ? 'cookie' : 'domain' => $cookie,
 					'name' => $hostname,
 					'ipv6' => $ip,
-					'ipaddress' => $ip
 			]];
 		} elseif (filter_var($ip, FILTER_VALIDATE_IP)) {
 			$callstring = [
