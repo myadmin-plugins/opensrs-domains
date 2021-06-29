@@ -453,7 +453,7 @@ class OpenSRS
 			//InvalidIp
 			return false;
 		}
-		
+
 		//echo "Call String: $callstring\n<br>";
 		$osrsHandler = self::request($callstring);
 		if (isset($osrsHandler) && isset($osrsHandler->resultFullRaw) && $osrsHandler->resultFullRaw['is_success'] == 1) {
