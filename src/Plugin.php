@@ -385,9 +385,35 @@ class Plugin
 				if (trim($serviceClass->getFax()) != '') {
 					$callArray['attributes']['contact_set']['owner']['fax'] = $serviceClass->getFax();
 				}
-				if ($callArray['attributes']['reg_type'] == 'premium') {
-					$callArray['attributes']['premium_price_to_verify'] = '';
+				/**
+				 * =========================================================
+				 * Check domain is premium or not, if yes then add attribute
+				 * =========================================================
+				 *
+				 * Ganesh
+				 * **/
+
+				$searchResult = \Detain\MyAdminOpenSRS\OpenSRS::searchDomain($serviceClass->getHostname(), 'SuggestDomain');
+				$domainDetails = $searchResult['domainData']['attributes']['lookup']['items']['0'];
+				if (isset($domainDetails['reason']) && $domainDetails['reason'] === 'Premium Name') {
+					$priceCallArray = array(
+						'func' => 'lookupGetPrice',
+						'data' => array('domain' => $serviceClass->getHostname())
+					);
+					$osrsRequestObj = new \opensrs\Request();
+					$osrsPriceObjHandler = $osrsRequestObj->process('json', json_encode($priceCallArray));
+					if (isset($osrsPriceObjHandler) && isset($osrsPriceObjHandler->resultRaw['price'])) {
+						$callArray['attributes']['premium_price_to_verify'] = $osrsPriceObjHandler->resultRaw['price'];
+					}
+					myadmin_log('opensrs', 'info', 'Got Premium domain :'.$serviceClass->getHostname().' Registering it with price of $'.$osrsPriceObjHandler->resultRaw['price'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				}
+				/**
+				 * End of Premium domain checking
+				 * **/
+
+				/*if ($callArray['attributes']['reg_type'] == 'premium') {
+					$callArray['attributes']['premium_price_to_verify'] = '';
+				}*/
 				if (isset($extra['transfer']) && $extra['transfer'] == 'yes') {
 					$response = \Detain\MyAdminOpenSRS\OpenSRS::lookupDomain($serviceClass->getHostname());
 					if ($response !== false) {
