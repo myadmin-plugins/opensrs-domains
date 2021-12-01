@@ -247,7 +247,7 @@ class Plugin
 			if ($renew === true) {
 				$formFormat = 'json';
 				$callArray = [
-					'func' => 'provRenew', 
+					'func' => 'provRenew',
 					'attributes' => [
 						'auto_renew' => '0',
 						'currentexpirationyear' => $expireyear,
@@ -325,6 +325,9 @@ class Plugin
 						} elseif (preg_match("/^wordpress(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
 							$dns1 = 'dnswordpress'.$matches['id'].'a.trouble-free.net';
 							$dns2 = 'dnswordpress'.$matches['id'].'b.trouble-free.net';
+						} elseif (preg_match("/^da(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
+							$dns1 = 'da'.$matches['id'].'a.trouble-free.net';
+							$dns2 = 'da'.$matches['id'].'b.trouble-free.net';
 						} else {
 							$dns1 = 'dns.trouble-free.net';
 							$dns2 = 'dns2.trouble-free.net';
@@ -370,9 +373,9 @@ class Plugin
 						'handle' => 'save',
 						'link_domains' => '0',
 						'nameserver_list' => [
-							['name' => $dns1, 'sortorder' => 1], 
-							['name' => $dns2, 'sortorder' => 2], 
-							['name' => $dns3, 'sortorder' => 3] 
+							['name' => $dns1, 'sortorder' => 1],
+							['name' => $dns2, 'sortorder' => 2],
+							['name' => $dns3, 'sortorder' => 3]
 						],
 						'period' => '1',
 						'reg_username' => $username,
@@ -381,7 +384,7 @@ class Plugin
 				]];
 				if (isset($extra['auth_info']) && trim($extra['auth_info']) != '') {
 					$callArray['attributes']['auth_info'] = $extra['auth_info'];
-				}				
+				}
 				if (trim($serviceClass->getFax()) != '') {
 					$callArray['attributes']['contact_set']['owner']['fax'] = $serviceClass->getFax();
 				}
@@ -643,7 +646,7 @@ class Plugin
 						if (!isset($error) || $error === false) {
 							unset($osrsHandler);
 							$callArray = [
-								'func' => 'provProcessPending', 
+								'func' => 'provProcessPending',
 								'attributes' => [
 									'order_id' => $orderId
 							]];
@@ -681,7 +684,7 @@ class Plugin
 							if ((!isset($error) || $error === false) && isset($osrsHandler) && isset($osrsHandler->resultFullRaw)) {
 								$callString = '';
 								$callArray = [
-									'func' => 'nsAdvancedUpdt', 
+									'func' => 'nsAdvancedUpdt',
 									'attributes' => [
 										'domain' => $serviceClass->getHostname(),
 										'op_type' => 'assign',
