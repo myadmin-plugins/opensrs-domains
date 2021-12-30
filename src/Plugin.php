@@ -355,7 +355,7 @@ class Plugin
 								'address3' => $serviceClass->getAddress3(),
 								'city' => $serviceClass->getCity(),
 								'state' => $serviceClass->getState(),
-								'postal_code' => str_replace(' ', '', $serviceClass->getZip()),
+								'postal_code' => trim($serviceClass->getZip()),
 								'country' => $country,
 								'phone' => $phone,
 								'email' => $serviceClass->getEmail(),
