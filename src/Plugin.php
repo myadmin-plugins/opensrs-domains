@@ -548,7 +548,7 @@ class Plugin
 								$au_registrant_info['eligibility_id'] = $extra['eligibility_id'];
 								$au_registrant_info['eligibility_name'] = $extra['eligibility_name'];
 							}
-							if (in_array($serviceTld, ['.com.au'])) {
+							if (in_array($serviceTld, ['.com.au', '.org.au'])) {
 								$au_registrant_info['eligibility_type'] = $extra['eligibility_type'];
 							}
 							$callArray['attributes']['tld_data']['au_registrant_info'] = $au_registrant_info;
