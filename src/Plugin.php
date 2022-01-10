@@ -432,7 +432,7 @@ class Plugin
 						myadmin_log('opensrs', 'info', 'Transfer: YES', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						//if ($serviceTld == '.com.ph')
 						//	$callArray['attributes']['period'] = 0;
-						if ($serviceTld == '.com.au') {
+						if (in_array($serviceTld, ['.com.au', '.org.au', '.lt', '.asn.au', '.au', '.id.au'])) {
 							$callArray['attributes']['period'] = 0;
 						}
 					} else {
