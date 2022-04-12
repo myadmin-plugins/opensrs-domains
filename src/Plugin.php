@@ -167,6 +167,7 @@ class Plugin
 			$data = $GLOBALS['tf']->accounts->read($serviceClass->getCustid());
 			if ($data['status'] == 'locked') {
 				dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
+				del_lock('domains'.$id);
 				myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				return false;
 			}
@@ -227,11 +228,12 @@ class Plugin
 						dialog('Failed', 'Something went wrong. Please contact support team.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain for {$db->Record['invoices_amount']} without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
+						del_lock('domains'.$id);
 						return false;
 					}
 					$website_active = false;
 					while ($db->next_record(MYSQL_ASSOC)) {
-                        $website_id = $db->Record['website_id'];
+						$website_id = $db->Record['website_id'];
 						if ($db->Record['website_status'] == 'active')
 							$website_active = true;
 					}
@@ -239,6 +241,7 @@ class Plugin
 						dialog('Failed', 'Kindly make payment of website '.$website_id.' you ordered along with this domain.');
 						myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$website_id}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
 						$dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
+						del_lock('domains'.$id);
 						return false;
 					}
 				}
@@ -745,11 +748,14 @@ Interserver, Inc.<br>
 				myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$serviceClass->setStatus('pending')->save();
 				myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+				del_lock('domains'.$id);
 				return false;
 			}
 			domain_welcome_email($id, $renew);
+			del_lock('domains'.$id);
 			return true;
 		}
+		del_lock('domains'.$id);
 		return false;
 	}
 }
