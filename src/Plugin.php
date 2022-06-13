@@ -319,22 +319,12 @@ class Plugin
 				$dns3 = 'cdns3.interserver.net';
 				if (isset($GLOBALS['modules']['webhosting'])) {
 					$db2 = get_module_db('webhosting');
-					$db2->query("select websites.*, website_name, website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
+					$db2->query("select websites.*, website_dns1, website_dns2, website_name, website_website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
 					if ($db2->num_rows() > 0) {
+
 						$db2->next_record(MYSQL_ASSOC);
-						if (preg_match("/^webhosting(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
-							$dns1 = 'dns'.$matches['id'].'a.trouble-free.net';
-							$dns2 = 'dns'.$matches['id'].'b.trouble-free.net';
-						} elseif (preg_match("/^wordpress(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
-							$dns1 = 'dnswordpress'.$matches['id'].'a.trouble-free.net';
-							$dns2 = 'dnswordpress'.$matches['id'].'b.trouble-free.net';
-						} elseif (preg_match("/^da(?P<id>[\d]*)\./", $db2->Record['website_name'], $matches)) {
-							$dns1 = 'da'.$matches['id'].'a.trouble-free.net';
-							$dns2 = 'da'.$matches['id'].'b.trouble-free.net';
-						} else {
-							$dns1 = 'dns.trouble-free.net';
-							$dns2 = 'dns2.trouble-free.net';
-						}
+						$dns1 = $db2->record['website_dns1'];
+						$dns2 = $db2->record['website_dns2'];
 						$dns3 = '';
 					}
 				}
