@@ -319,7 +319,7 @@ class Plugin
 				$dns3 = 'cdns3.interserver.net';
 				if (isset($GLOBALS['modules']['webhosting'])) {
 					$db2 = get_module_db('webhosting');
-					$db2->query("select websites.*, website_dns1, website_dns2, website_name, website_website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
+					$db2->query("select websites.*, website_dns1, website_dns2, website_name, website_masters.website_ip as website_server_ip from websites left join website_masters on website_server=website_masters.website_id where website_hostname='".$db2->real_escape($serviceClass->getHostname())."'", __LINE__, __FILE__);
 					if ($db2->num_rows() > 0) {
 
 						$db2->next_record(MYSQL_ASSOC);
