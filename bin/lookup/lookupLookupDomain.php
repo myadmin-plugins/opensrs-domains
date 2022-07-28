@@ -6,18 +6,18 @@ require_once __DIR__ . '/../../../../detain/myadmin-opensrs-domains/src/openSRS_
 use opensrs\Request;
 
 $callstring = json_encode(
-	[
-		'func' => 'LookupDomain', 'attributes' => [
+    [
+        'func' => 'LookupDomain', 'attributes' => [
 'domain' => $_SERVER['argv'][1]
-	]
-	]
+    ]
+    ]
 );
 try {
-	$request = new Request();
-	$osrsHandler = $request->process('json', $callstring);
+    $request = new Request();
+    $osrsHandler = $request->process('json', $callstring);
 
-	print('In: ' . $callstring . "\n");
-	print('Out: ' . json_encode(json_decode($osrsHandler->resultFormatted), JSON_PRETTY_PRINT) . "\n");
+    print('In: ' . $callstring . "\n");
+    print('Out: ' . json_encode(json_decode($osrsHandler->resultFormatted), JSON_PRETTY_PRINT) . "\n");
 } catch (\opensrs\Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }

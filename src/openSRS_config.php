@@ -1,8 +1,9 @@
 <?php
+
 // Paths
 // Setting default path to the same directory this file is in
 if (!defined('DS')) {
-	define('DS', DIRECTORY_SEPARATOR);
+    define('DS', DIRECTORY_SEPARATOR);
 }
 define('PS', PATH_SEPARATOR);
 define('CRLF', "\r\n");
@@ -41,7 +42,7 @@ define('OPENSRSFASTLOOKUP', OPENSRSURI.DS.'fastlookup');
 
 
 if (!defined('OPENSRS_USERNAME')) {
-	include_once __DIR__.'/../../../../include/config/config.settings.php';
+    include_once __DIR__.'/../../../../include/config/config.settings.php';
 }
 
 /**
