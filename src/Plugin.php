@@ -547,6 +547,9 @@ class Plugin
                             if (in_array($serviceTld, ['.com.au', '.org.au'])) {
                                 $au_registrant_info['eligibility_type'] = isset($extra['eligibility_type']) ? $extra['eligibility_type'] : '';
                             }
+                            if ($serviceTld == '.au') {
+                                $au_registrant_info['eligibility_type'] = 'Citizen/Resident';
+                            }
                             $callArray['attributes']['tld_data']['au_registrant_info'] = $au_registrant_info;
                         }
                         if ($serviceTld == '.com.br') {
