@@ -136,9 +136,9 @@ class Plugin
          **/
         $settings = $event->getSubject();
         $settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_username', _('OpenSRS Username'), _('Username to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_USERNAME'));
-        $settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_password', _('OpenSRS Password'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_PASSWORD'));
-        $settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_key', _('OpenSRS API Key'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_KEY'));
-        $settings->add_text_setting(self::$module, _('API Settings'), 'opensrs_test_key', _('OpenSRS Test API Key'), _('Password to use for OpenSRS Test API Authentication'), $settings->get_setting('OPENSRS_TEST_KEY'));
+        $settings->add_password_setting(self::$module, _('API Settings'), 'opensrs_password', _('OpenSRS Password'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_PASSWORD'));
+        $settings->add_password_setting(self::$module, _('API Settings'), 'opensrs_key', _('OpenSRS API Key'), _('Password to use for OpenSRS API Authentication'), $settings->get_setting('OPENSRS_KEY'));
+        $settings->add_password_setting(self::$module, _('API Settings'), 'opensrs_test_key', _('OpenSRS Test API Key'), _('Password to use for OpenSRS Test API Authentication'), $settings->get_setting('OPENSRS_TEST_KEY'));
         $settings->add_text_setting(self::$module, _('Price Adjustments'), 'opensrs_profit', _('Default Amount to add to our cost for domain registrations to pass onto the client'), _('For example, if it costs us $6 to register a .site domain and this is set to 3, it would cost a client $9'), $settings->get_setting('OPENSRS_PROFIT'));
         $settings->add_text_setting(self::$module, _('Price Adjustments'), 'opensrs_privacy_cost', _('How much to charge for Whois Privacy on a domain'), _('OpenSRS Charges for this so make sure you at least charge what they charge!'), $settings->get_setting('OPENSRS_PRIVACY_COST'));
         $settings->add_dropdown_setting(self::$module, _('Out of Stock'), 'outofstock_opensrs_domains', _('Out Of Stock OpenSRS Domains'), _('Enable/Disable Sales Of This Type'), OUTOFSTOCK_OPENSRS_DOMAINS, ['0', '1'], ['No', 'Yes']);
