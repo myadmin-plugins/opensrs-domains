@@ -190,7 +190,7 @@ class Plugin
                 $parts = explode('-', $expiry_full_date);
                 $expireyear =  $parts[0];
                 myadmin_log('domains', 'info', "Expire Date {$expiry_full_date}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
-                $db->query("SELECT * FROM tld_info WHERE tld_tld = '$serviceTld'");
+                $db->query("SELECT * FROM tld_info WHERE `tld_.` = '$serviceTld'");
                 if ($db->num_rows() > 0) {
                     $db->next_record();
                     $tld_info = $db->Record;
