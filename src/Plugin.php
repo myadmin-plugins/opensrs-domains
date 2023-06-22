@@ -69,7 +69,6 @@ class Plugin
         $serviceInfo = $serviceOrder->getServiceInfo();
         $settings = get_module_settings(self::$module);
         myadmin_log(self::$module, 'info', 'OpenSRS Whois Privacy Activation', __LINE__, __FILE__, self::$module, $serviceInfo[$settings['PREFIX'].'_id']);
-        function_requirements('class.OpenSRS');
         OpenSRS::whoisPrivacy($serviceInfo[$settings['PREFIX'].'_hostname'], true);
     }
 
@@ -83,7 +82,6 @@ class Plugin
     {
         $serviceInfo = $serviceOrder->getServiceInfo();
         $settings = get_module_settings(self::$module);
-        function_requirements('class.OpenSRS');
         OpenSRS::whoisPrivacy($serviceInfo[$settings['PREFIX'].'_hostname'], false);
     }
 
@@ -123,7 +121,7 @@ class Plugin
          * @var \MyAdmin\Plugins\Loader $this->loader
          */
         $loader = $event->getSubject();
-        $loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
+//        $loader->add_requirement('class.OpenSRS', '/../vendor/detain/myadmin-opensrs-domains/src/OpenSRS.php', '\\Detain\\MyAdminOpenSRS\\');
     }
 
     /**
@@ -153,7 +151,6 @@ class Plugin
     public static function activate_domain($id)
     {
         page_title('Activate Domain');
-        function_requirements('class.OpenSRS');
         $settings = get_module_settings('domains');
         $db = get_module_db('domains');
         $id = (int) $id;
