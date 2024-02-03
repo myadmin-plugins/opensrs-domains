@@ -10,7 +10,7 @@ $callstring = json_encode(
         'func' => 'lookupGetDomain', 'attributes' => [
         'domain' => $_SERVER['argv'][1],
         //	'cookie' => $_SERVER['argv'][1],,
-        'type' => isset($_SERVER['argv'][2]) ? $_SERVER['argv'][2] : 'all_info',
+        'type' => $_SERVER['argv'][2] ?? 'all_info',
         'bypass' => '',
         'registrant_ip' => '',
         //				'limit' => '10',

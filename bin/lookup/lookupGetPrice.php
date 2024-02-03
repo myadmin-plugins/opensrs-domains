@@ -9,7 +9,7 @@ $callstring = json_encode(
     [
         'func' => 'lookupGetPrice', 'attributes' => [
     'domain' => $_SERVER['argv'][1],
-    'reg_type' => isset($_SERVER['argv'][2]) ? $_SERVER['argv'][2] : 'new'
+    'reg_type' => $_SERVER['argv'][2] ?? 'new'
     ]
     ]
 );

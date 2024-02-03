@@ -392,10 +392,10 @@ class Plugin
                 $searchResult = \Detain\MyAdminOpenSRS\OpenSRS::searchDomain($serviceClass->getHostname(), 'SuggestDomain');
                 $domainDetails = $searchResult['domainData']['attributes']['lookup']['items']['0'];
                 if (isset($domainDetails['reason']) && $domainDetails['reason'] === 'Premium Name') {
-                    $priceCallArray = array(
+                    $priceCallArray = [
                         'func' => 'lookupGetPrice',
-                        'data' => array('domain' => $serviceClass->getHostname())
-                    );
+                        'data' => ['domain' => $serviceClass->getHostname()]
+                    ];
                     $osrsRequestObj = new \opensrs\Request();
                     $osrsPriceObjHandler = $osrsRequestObj->process('json', json_encode($priceCallArray));
                     if (isset($osrsPriceObjHandler) && isset($osrsPriceObjHandler->resultRaw['price'])) {
@@ -447,14 +447,14 @@ class Plugin
                     //$callArray['attributes']["owner_confirm_address"] = $callArray['personal']['email'];
                 }
                 if ($serviceTld == '.ca') {
-                    $callArray['attributes']['ca_link_domain'] = (isset($extra['ca_link_domain']) ? $extra['ca_link_domain'] : '');
-                    $callArray['attributes']['cwa'] = (isset($extra['cwa']) ? $extra['cwa'] : '');
-                    $callArray['attributes']['domain_description'] = (isset($extra['domain_description']) ? $extra['domain_description'] : '');
-                    $callArray['attributes']['isa_trademark'] = (isset($extra['isa_trademark']) ? $extra['isa_trademark'] : 'N');
-                    $callArray['attributes']['lang_pref'] = (isset($extra['lang_pref']) ? $extra['lang_pref'] : 'EN');
-                    $callArray['attributes']['legal_type'] = (isset($extra['legal_type']) ? $extra['legal_type'] : 'CCT');
-                    $callArray['attributes']['rant_agrees'] = (isset($extra['rant_agrees']) ? $extra['rant_agrees'] : '');
-                    $callArray['attributes']['rant_no'] = (isset($extra['rant_no']) ? $extra['rant_no'] : '');
+                    $callArray['attributes']['ca_link_domain'] = ($extra['ca_link_domain'] ?? '');
+                    $callArray['attributes']['cwa'] = ($extra['cwa'] ?? '');
+                    $callArray['attributes']['domain_description'] = ($extra['domain_description'] ?? '');
+                    $callArray['attributes']['isa_trademark'] = ($extra['isa_trademark'] ?? 'N');
+                    $callArray['attributes']['lang_pref'] = ($extra['lang_pref'] ?? 'EN');
+                    $callArray['attributes']['legal_type'] = ($extra['legal_type'] ?? 'CCT');
+                    $callArray['attributes']['rant_agrees'] = ($extra['rant_agrees'] ?? '');
+                    $callArray['attributes']['rant_no'] = ($extra['rant_no'] ?? '');
                 }
                 if ($serviceTld == '.tel') {
                     $callArray['attributes']['custom_nameservers'] = 0;
@@ -531,18 +531,18 @@ class Plugin
                     } else {
                         if (in_array($serviceTld, ['.au', '.id.au', '.asn.au', '.net.au', '.org.au', '.com.au'])) {
                             $au_registrant_info = [
-                                'policy_reason' => isset($extra['policy_reason']) ? $extra['policy_reason'] : '',
-                                'registrant_id_type' => isset($extra['registrant_id_type']) ? $extra['registrant_id_type'] : '',
-                                'registrant_id' => isset($extra['registrant_id']) ? $extra['registrant_id'] : '',
-                                'registrant_name' => isset($extra['registrant_name']) ? $extra['registrant_name'] : ''
+                                'policy_reason' => $extra['policy_reason'] ?? '',
+                                'registrant_id_type' => $extra['registrant_id_type'] ?? '',
+                                'registrant_id' => $extra['registrant_id'] ?? '',
+                                'registrant_name' => $extra['registrant_name'] ?? ''
                             ];
                             if (in_array($serviceTld, ['.asn.au', '.net.au', '.org.au', '.com.au'])) {
-                                $au_registrant_info['eligibility_id_type'] = isset($extra['eligibility_id_type']) ? $extra['eligibility_id_type'] : '';
-                                $au_registrant_info['eligibility_id'] = isset($extra['eligibility_id']) ? $extra['eligibility_id'] : '';
-                                $au_registrant_info['eligibility_name'] = isset($extra['eligibility_name']) ? $extra['eligibility_name'] : '';
+                                $au_registrant_info['eligibility_id_type'] = $extra['eligibility_id_type'] ?? '';
+                                $au_registrant_info['eligibility_id'] = $extra['eligibility_id'] ?? '';
+                                $au_registrant_info['eligibility_name'] = $extra['eligibility_name'] ?? '';
                             }
                             if (in_array($serviceTld, ['.com.au', '.org.au'])) {
-                                $au_registrant_info['eligibility_type'] = isset($extra['eligibility_type']) ? $extra['eligibility_type'] : '';
+                                $au_registrant_info['eligibility_type'] = $extra['eligibility_type'] ?? '';
                             }
                             if ($serviceTld == '.au') {
                                 $au_registrant_info['eligibility_type'] = 'Citizen/Resident';
@@ -554,49 +554,49 @@ class Plugin
                             }
                         }
                         if ($serviceTld == '.com.br') {
-                            $callArray['attributes']['tld_data']['br_register_number'] = isset($extra['br_register_number']) ? $extra['br_register_number'] : '';
+                            $callArray['attributes']['tld_data']['br_register_number'] = $extra['br_register_number'] ?? '';
                         }
                         if ($serviceTld == '.com.au') {
                             $callArray['attributes']['tld_data']['au_registrant_info'] = [
-                                'policy_reason' => isset($extra['policy_reason']) ? $extra['policy_reason'] : '',
-                                'registrant_id_type' => isset($extra['registrant_id_type']) ? $extra['registrant_id_type'] : '',
-                                'registrant_id' => isset($extra['registrant_id']) ? $extra['registrant_id'] : '',
-                                'registrant_name' => isset($extra['registrant_name']) ? $extra['registrant_name'] : '',
-                                'eligibility_id_type' => isset($extra['eligibility_id_type']) ? $extra['eligibility_id_type'] : '',
-                                'eligibility_id' => isset($extra['eligibility_id']) ? $extra['eligibility_id'] : '',
-                                'eligibility_name' => isset($extra['eligibility_name']) ? $extra['eligibility_name'] : '',
-                                'eligibility_type' => isset($extra['eligibility_type']) ? $extra['eligibility_type'] : ''
+                                'policy_reason' => $extra['policy_reason'] ?? '',
+                                'registrant_id_type' => $extra['registrant_id_type'] ?? '',
+                                'registrant_id' => $extra['registrant_id'] ?? '',
+                                'registrant_name' => $extra['registrant_name'] ?? '',
+                                'eligibility_id_type' => $extra['eligibility_id_type'] ?? '',
+                                'eligibility_id' => $extra['eligibility_id'] ?? '',
+                                'eligibility_name' => $extra['eligibility_name'] ?? '',
+                                'eligibility_type' => $extra['eligibility_type'] ?? ''
                             ];
                         }
                         if ($serviceTld == '.asia') {
                             $callArray['attributes']['tld_data']['ced_info'] = [
-                                'contact_type' => isset($extra['contact_type']) ? $extra['contact_type'] : '',
-                                'id_number' => isset($extra['id_number']) ? $extra['id_number'] : '',
-                                'id_type' => isset($extra['id_type']) ? $extra['id_type'] : '',
-                                'id_type_info' => isset($extra['id_type_info']) ? $extra['id_type_info'] : '',
-                                'legal_entity_type' => isset($extra['legal_entity_type']) ? $extra['legal_entity_type'] : '',
-                                'legal_entity_type_info' => isset($extra['legal_entity_type_info']) ? $extra['legal_entity_type_info'] : '',
-                                'locality_city' => isset($extra['locality_city']) ? $extra['locality_city'] : '',
-                                'locality_country' => isset($extra['locality_country']) ? $extra['locality_country'] : '',
-                                'locality_state_prov' => isset($extra['locality_state_prov']) ? $extra['locality_state_prov'] : ''];
+                                'contact_type' => $extra['contact_type'] ?? '',
+                                'id_number' => $extra['id_number'] ?? '',
+                                'id_type' => $extra['id_type'] ?? '',
+                                'id_type_info' => $extra['id_type_info'] ?? '',
+                                'legal_entity_type' => $extra['legal_entity_type'] ?? '',
+                                'legal_entity_type_info' => $extra['legal_entity_type_info'] ?? '',
+                                'locality_city' => $extra['locality_city'] ?? '',
+                                'locality_country' => $extra['locality_country'] ?? '',
+                                'locality_state_prov' => $extra['locality_state_prov'] ?? ''];
                         }
                         if ($serviceTld == '.us') {
                             $callArray['attributes']['tld_data']['nexus'] = [
-                                'app_purpose' => isset($extra['app_purpose']) ? $extra['app_purpose'] : '',
-                                'category' => isset($extra['category']) ? $extra['category'] : ''
+                                'app_purpose' => $extra['app_purpose'] ?? '',
+                                'category' => $extra['category'] ?? ''
                             ];
                             if (trim($extra['validator']) != '' && in_array($extra['category'], ['C31', 'C32'])) {
-                                $callArray['attributes']['tld_data']['nexus']['validator'] = isset($extra['validator']) ? $extra['validator'] : '';
+                                $callArray['attributes']['tld_data']['nexus']['validator'] = $extra['validator'] ?? '';
                             }
                         }
                         if ($serviceTld == '.pro') {
                             $callArray['attributes']['tld_data']['professional_data'] = ['profession' => 'Administrator'];
                         }
                         if ($serviceTld == '.it') {
-                            $callArray['attributes']['tld_data']['it_registrant_info'] = ['entity_type' => isset($extra['entity_type']) ? $extra['entity_type'] : '', 'reg_code' => isset($extra['reg_code']) ? $extra['reg_code'] : ''];
+                            $callArray['attributes']['tld_data']['it_registrant_info'] = ['entity_type' => $extra['entity_type'] ?? '', 'reg_code' => $extra['reg_code'] ?? ''];
                         }
                         if ($serviceTld == '.name') {
-                            $callArray['attributes']['tld_data']['registrant_extra_info'] = ['forwarding_email' => isset($extra['forwarding_email']) ? $extra['forwarding_email'] : ''];
+                            $callArray['attributes']['tld_data']['registrant_extra_info'] = ['forwarding_email' => $extra['forwarding_email'] ?? ''];
                         }
                     }
                 }

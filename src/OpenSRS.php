@@ -424,7 +424,7 @@ class OpenSRS
         ]];
         $osrsHandler = self::request($callstring);
         request_log('domains', false, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
-        return isset($osrsHandler->resultFullRaw['nameserver_list']) ? $osrsHandler->resultFullRaw['nameserver_list'] : false;
+        return $osrsHandler->resultFullRaw['nameserver_list'] ?? false;
     }
 
     /**
