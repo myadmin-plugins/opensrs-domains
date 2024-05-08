@@ -477,6 +477,8 @@ class Plugin
                                 $callArray['attributes']['tld_data']['registrant_extra_info']['registrant_vat_id'] = $extra['registrant_vat_id'];
                                 $callArray['attributes']['tld_data']['registrant_extra_info']['registration_number'] = $extra['registration_number'];
                             }
+                            if ($serviceTld == '.nu')
+                                $callArray['attributes']['tld_data']['registrant_extra_info']['sif_agree'] = 'I Agree';
                         }
                         //.hk .ru
                         if (in_array($serviceTld, ['.hk', '.ru'])) {
