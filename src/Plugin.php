@@ -258,6 +258,20 @@ class Plugin
                         'period' => 1,
                     ]
                 ];
+                if ($serviceClass->getPremium() == 1) {
+                    $priceCallArray = [
+                        'func' => 'lookupGetPrice',
+                        'data' => [
+                            'domain' => $serviceClass->getHostname(),
+                            'reg_type' => 'renewal',
+                    ]];
+                    $osrsRequestObj = new \opensrs\Request();
+                    $osrsPriceObjHandler = $osrsRequestObj->process('json', json_encode($priceCallArray));
+                    if (isset($osrsPriceObjHandler) && isset($osrsPriceObjHandler->resultRaw['price'])) {
+                        $callArray['attributes']['premium_price_to_verify'] = $osrsPriceObjHandler->resultRaw['price'];
+                    }
+                    myadmin_log('opensrs', 'info', 'Got Premium domain :'.$serviceClass->getHostname().' Registering it with price of $'.$osrsPriceObjHandler->resultRaw['price'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                }
                 //if ($formFormat == "array") $callString = $callArray;
                 //if ($formFormat == "json") $callString = json_encode($callArray);
                 //if ($formFormat == "yaml") $callString = Spyc::YAMLDump($callArray);
