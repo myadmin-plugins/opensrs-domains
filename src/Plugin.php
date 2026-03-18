@@ -268,6 +268,7 @@ class Plugin
                         'data' => [
                             'domain' => $serviceClass->getHostname(),
                             'reg_type' => 'renewal',
+                            'period' => getDomainTermInfo($serviceTld)['term'],
                     ]];
                     $osrsRequestObj = new \opensrs\Request();
                     $osrsPriceObjHandler = $osrsRequestObj->process('json', json_encode($priceCallArray));
@@ -412,7 +413,7 @@ class Plugin
                 if (isset($domainDetails['reason']) && $domainDetails['reason'] === 'Premium Name') {
                     $priceCallArray = [
                         'func' => 'lookupGetPrice',
-                        'data' => ['domain' => $serviceClass->getHostname()]
+                        'data' => ['domain' => $serviceClass->getHostname(), 'period' => getDomainTermInfo($serviceTld)['term']]
                     ];
                     $osrsRequestObj = new \opensrs\Request();
                     $osrsPriceObjHandler = $osrsRequestObj->process('json', json_encode($priceCallArray));

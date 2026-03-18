@@ -644,6 +644,7 @@ class OpenSRS
                 //'searchstring' => $domain,
                 'domain' => $domain,
                 'reg_type' => $regType,
+                'period' => getDomainTermInfo(get_domain_tld($domain))['term'],
                 //'tlds' => array_keys(get_available_domain_tlds_by_tld()),
                 //'tlds' => array(get_domain_tld($domain)),
         ]];
