@@ -48,10 +48,14 @@ class Plugin
          */
         $service = $event->getSubject();
         function_requirements('class.AddonHandler');
+        $settings = get_module_settings(self::$module);
+        $serviceTypes = run_event('get_service_types', false, self::$module);
+        $addonTld = $serviceTypes[$service->serviceInfo[$settings['PREFIX'] . '_type']]['services_field1'] ?? '';
+        $addonTermInfo = getDomainTermInfo($addonTld);
         $addon = new \AddonHandler();
         $addon->setModule(self::$module)
             ->set_text('Whois Privacy')
-            ->set_cost(OPENSRS_PRIVACY_COST)
+            ->set_cost(OPENSRS_PRIVACY_COST * $addonTermInfo['term'])
             ->setEnable([__CLASS__, 'doAddonEnable'])
             ->setDisable([__CLASS__, 'doAddonDisable'])
             ->register();
@@ -255,7 +259,7 @@ class Plugin
                         'domain' => $serviceClass->getHostname(),
                         'f_parkp' => 'N',
                         'handle' => 'process',
-                        'period' => 1,
+                        'period' => getDomainTermInfo($serviceTld)['term'],
                     ]
                 ];
                 if ($serviceClass->getPremium() == 1) {
@@ -384,7 +388,7 @@ class Plugin
                             ['name' => $dns2, 'sortorder' => 2],
                             ['name' => $dns3, 'sortorder' => 3]
                         ],
-                        'period' => '1',
+                        'period' => getDomainTermInfo($serviceTld)['term'],
                         'reg_username' => $username,
                         'reg_password' => $password,
                         'reg_type' => 'new',
