@@ -10,10 +10,15 @@
 namespace Detain\MyAdminOpenSRS;
 
 require_once __DIR__.'/openSRS_loader.php';
-require_once __DIR__.'/../../../workerman/statistics/Applications/Statistics/Clients/StatisticClient.php';
 use opensrs\APIException;
 use opensrs\Exception;
 use opensrs\Request;
+
+
+if (is_file(__DIR__.'/../../../workerman/statistics/Applications/Statistics/Clients/StatisticClient.php')) {
+    require_once __DIR__.'/../../../workerman/statistics/Applications/Statistics/Clients/StatisticClient.php';
+}
+
 
 /**
  * OpenSRS Domain Class
@@ -197,7 +202,9 @@ class OpenSRS
             $action = $callstring['func'];
         }
         $callstring = json_encode($callstring);
-        \StatisticClient::tick('OpenSRS', $action);
+        if (class_exists(\StatisticClient::class, false)) {
+            \StatisticClient::tick('OpenSRS', $action);
+        }
         try {
             $request = new Request();
             $osrsHandler = $request->process('json', $callstring);
@@ -212,14 +219,20 @@ class OpenSRS
             } else {
                 add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
             }
-            \StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
+            if (class_exists(\StatisticClient::class, false)) {
+                \StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
+            }
             return false;
         } catch (\opensrs\Exception $e) {
             myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
-            \StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
+            if (class_exists(\StatisticClient::class, false)) {
+                \StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
+            }
             return false;
         }
-        \StatisticClient::report('OpenSRS', $action, true, 0, '', STATISTICS_SERVER);
+        if (class_exists(\StatisticClient::class, false)) {
+            \StatisticClient::report('OpenSRS', $action, true, 0, '', STATISTICS_SERVER);
+        }
         return $osrsHandler;
     }
 
