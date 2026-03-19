@@ -25,7 +25,7 @@
 		}
 	},
 	"require": {
-		"php": ">=8.2",
+		"php": ">=7.4",
 		"ext-soap": "*",
 		"ext-libxml": "*",
 		"ext-simplexml": "*",
