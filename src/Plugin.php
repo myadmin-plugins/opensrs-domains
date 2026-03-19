@@ -50,7 +50,8 @@ class Plugin
         function_requirements('class.AddonHandler');
         $settings = get_module_settings(self::$module);
         $serviceTypes = run_event('get_service_types', false, self::$module);
-        $addonTld = $serviceTypes[$service->serviceInfo[$settings['PREFIX'] . '_type']]['services_field1'] ?? '';
+        $serviceInfo = $service->getServiceInfo();
+        $addonTld = $serviceTypes[$serviceInfo[$settings['PREFIX'] . '_type']]['services_field1'] ?? '';
         $addonTermInfo = getDomainTermInfo($addonTld);
         $addon = new \AddonHandler();
         $addon->setModule(self::$module)
