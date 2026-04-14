@@ -461,9 +461,9 @@ class Plugin
                 //	$callArray['attributes']['registrant_extra_info'] = $callArray['registrant_extra_info'];
                 if (in_array($serviceTld, ['.eu', '.be', '.de'])) {
                     //$callArray['personal']['entity_type'] = 2;
-                    $callArray['attributes']['eu_country'] = $extra['domain_country'];
-                    $callArray['attributes']['lang'] = $extra['lang'];
-                    $callArray['attributes']['owner_confirm_address'] = $extra['owner_confirm_address'];
+                    $callArray['attributes']['eu_country'] = $extra['domain_country'] ?? null;
+                    $callArray['attributes']['lang'] = $extra['lang'] ?? null;
+                    $callArray['attributes']['owner_confirm_address'] = $extra['owner_confirm_address'] ?? null;
                     //$callArray['attributes']["owner_confirm_address"] = $callArray['personal']['email'];
                 }
                 if ($serviceTld == '.ca') {
