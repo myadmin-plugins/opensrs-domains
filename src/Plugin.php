@@ -110,7 +110,7 @@ class Plugin
     public static function getMenu(GenericEvent $event)
     {
         $menu = $event->getSubject();
-        if ($GLOBALS['tf']->ima == 'admin') {
+        if (\MyAdmin\App::ima() == 'admin') {
             $menu->add_link(self::$module, 'choice=none.reusable_opensrs', '/images/myadmin/to-do.png', _('ReUsable OpenSRS Licenses'));
             $menu->add_link(self::$module, 'choice=none.opensrs_list', '/images/myadmin/to-do.png', _('OpenSRS Licenses Breakdown'));
             $menu->add_link(self::$module.'api', 'choice=none.opensrs_licenses_list', '/images/whm/createacct.gif', _('List all OpenSRS Licenses'));
@@ -166,7 +166,7 @@ class Plugin
         $serviceClass = new $class();
         $serviceClass->load_real($id);
         if ($serviceClass->loaded === true) {
-            $data = $GLOBALS['tf']->accounts->read($serviceClass->getCustid());
+            $data = \MyAdmin\App::accounts()->read($serviceClass->getCustid());
             if ($data['status'] == 'locked') {
                 dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
                 del_lock('domains'.$id);
@@ -754,7 +754,7 @@ The Error message from the registrar was:<br>
 <br>
 To fix this and help ensure your domain registration goes through smoothly please<br>
 update the appropriate info at this url:<br>
-<a href="https://'.DOMAIN.$GLOBALS['tf']->link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.$GLOBALS['tf']->link(
+<a href="https://'.DOMAIN.\MyAdmin\App::link('/index.php', 'choice=none.view_domain&id='.$id).'">https://'.DOMAIN.\MyAdmin\App::link(
                     '/index.php',
                     'choice=none.view_domain&id='.$id
                 ).'</a><br>

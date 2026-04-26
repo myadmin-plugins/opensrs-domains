@@ -57,8 +57,8 @@ class OpenSRS
         $this->settings = get_module_settings($this->module);
         if ($id != false) {
             $this->id = (int) $id;
-        } elseif (isset($GLOBALS['tf']->variables->request['id'])) {
-            $this->id = (int) $GLOBALS['tf']->variables->request['id'];
+        } elseif (isset(\MyAdmin\App::variables()->request['id'])) {
+            $this->id = (int) \MyAdmin\App::variables()->request['id'];
         } else {
             return;
         }
@@ -213,7 +213,7 @@ class OpenSRS
             $info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
             myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage().':'.$info, __LINE__, __FILE__);
             if ($e->getMessage() == 'oSRS Error Code #480: Domain not found.') {
-                if ($GLOBALS['tf']->ima == 'admin') {
+                if (\MyAdmin\App::ima() == 'admin') {
                     add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
                 }
             } else {
