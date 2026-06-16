@@ -768,7 +768,7 @@ Interserver, Inc.<br>
                 $serviceClass->setStatus('pending')->save();
                 myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
                 chatNotify('Domain '. $renew ? 'Renewal' : 'Register'.' Error - ' . $error
-                    . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'Notifications');
+                    . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'INT-DEV-Private');
                 del_lock('domains'.$id);
                 return false;
             }
