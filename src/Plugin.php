@@ -33,6 +33,7 @@ class Plugin
         return [
             self::$module.'.load_addons' => [__CLASS__, 'getAddon'],
             self::$module.'.activate' => [__CLASS__, 'getActivate'],
+            self::$module.'.reactivate' => [__CLASS__, 'getReactivate'],
             self::$module.'.settings' => [__CLASS__, 'getSettings'],
             'function.requirements' => [__CLASS__, 'getRequirements']
         ];
@@ -98,6 +99,22 @@ class Plugin
         $serviceClass = $event->getSubject();
         if ($event['category'] == get_service_define('OPENSRS')) {
             myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
+            $return = self::activate_domain($serviceClass->getId());
+            $event['success'] = $return;
+            $event->stopPropagation();
+        }
+    }
+
+    /**
+     * Handles domain reactivation. Reactivation must still renew the domain at the opensrs,
+     *
+     * @param \Symfony\Component\EventDispatcher\GenericEvent $event
+     */
+    public static function getReactivate(GenericEvent $event)
+    {
+        $serviceClass = $event->getSubject();
+        if ($event['category'] == get_service_define('OPENSRS')) {
+            myadmin_log(self::$module, 'info', 'OpenSRS Reactivation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
             $return = self::activate_domain($serviceClass->getId());
             $event['success'] = $return;
             $event->stopPropagation();
