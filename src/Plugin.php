@@ -17,6 +17,7 @@ class Plugin
     public static $help = 'It provides more than one million end users the ability to quickly install dozens of the leading open source content management systems into their web space.  	Must have a pre-existing cPanel license with cPanelDirect to purchase a OpenSRS license. Allow 10 minutes for activation.';
     public static $module = 'domains';
     public static $type = 'service';
+    public static $lastError = '';
 
     /**
      * Plugin constructor.
@@ -101,6 +102,10 @@ class Plugin
             myadmin_log(self::$module, 'info', 'OpenSRS Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
             $return = self::activate_domain($serviceClass->getId());
             $event['success'] = $return;
+            if ($return === false) {
+                $event['status'] = 'error';
+                $event['status_text'] = self::$lastError;
+            }
             $event->stopPropagation();
         }
     }
@@ -117,6 +122,10 @@ class Plugin
             myadmin_log(self::$module, 'info', 'OpenSRS Reactivation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
             $return = self::activate_domain($serviceClass->getId());
             $event['success'] = $return;
+            if ($return === false) {
+                $event['status'] = 'error';
+                $event['status_text'] = self::$lastError;
+            }
             $event->stopPropagation();
         }
     }
@@ -177,6 +186,7 @@ class Plugin
         $db = get_module_db('domains');
         $id = (int) $id;
         $serviceTypes = run_event('get_service_types', false, 'domains');
+        self::$lastError = '';
         $renew = false;
         $class = '\\MyAdmin\\Orm\\'.get_orm_class_from_table($settings['TABLE']);
         /** @var \MyAdmin\Orm\Product $class **/
@@ -188,6 +198,7 @@ class Plugin
                 dialog('Account is Locked', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}");
                 del_lock('domains'.$id);
                 myadmin_log('opensrs', 'info', "The account for this domain is locked so skipping activation of {$settings['TITLE']} {$serviceClass->getId()}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                self::$lastError = 'Account is locked, activation skipped.';
                 return false;
             }
             $username = $serviceClass->getUsername();
@@ -248,6 +259,7 @@ class Plugin
                         myadmin_log('opensrs', 'info', "Customer trying to register domain for {$db->Record['invoices_amount']} without webhosting order", __LINE__, __FILE__, self::$module, $serviceClass->getId());
                         $dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
                         del_lock('domains'.$id);
+                        self::$lastError = 'Promo domain price ('.$db->Record['invoices_amount'].') requires an webhosting order, none found.';
                         return false;
                     }
                     $website_active = false;
@@ -262,6 +274,7 @@ class Plugin
                         myadmin_log('opensrs', 'info', "Customer trying to register domain without paying webhosting order {$website_id}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
                         $dbC->query("UPDATE {$settings['TABLE']} SET {$settings['PREFIX']}_status = 'pending' WHERE {$settings['PREFIX']}_id = $id LIMIT 1");
                         del_lock('domains'.$id);
+                        self::$lastError = 'Webhosting order '.$website_id.' is not active/paid.';
                         return false;
                     }
                 }
@@ -784,12 +797,14 @@ Interserver, Inc.<br>
                 myadmin_log('opensrs', 'info', $subject, __LINE__, __FILE__, self::$module, $serviceClass->getId());
                 $serviceClass->setStatus('pending')->save();
                 myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-                chatNotify('Domain '. $renew ? 'Renewal' : 'Register'.' Error - ' . $error
-                    . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'INT-DEV-Private');
+                self::$lastError = strip_tags(str_replace('<br>', ' ', $error));
+                chatNotify('Domain '. ($renew ? 'Renewal' : 'Register') .' Error - ' . $error
+                    . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'int-dev');
                 del_lock('domains'.$id);
                 return false;
             }
             domain_welcome_email($id, $renew);
+            self::$lastError = 'Domain service '.$id.' could not be loaded.';
             del_lock('domains'.$id);
             return true;
         }
