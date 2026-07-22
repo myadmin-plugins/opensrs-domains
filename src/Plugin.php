@@ -798,8 +798,10 @@ Interserver, Inc.<br>
                 $serviceClass->setStatus('pending')->save();
                 myadmin_log('opensrs', 'info', 'Status changed to pending.', __LINE__, __FILE__, self::$module, $serviceClass->getId());
                 self::$lastError = strip_tags(str_replace('<br>', ' ', $error));
-                chatNotify('Domain '. ($renew ? 'Renewal' : 'Register') .' Error - ' . $error
-                    . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'int-dev');
+                if ($renew == true) {
+                    chatNotify('Domain '. ($renew ? 'Renewal' : 'Register') .' Error - ' . $error
+                        . ' (' . $serviceClass->getId() . ' ' . $serviceClass->getHostname() . ')', 'int-dev');
+                }
                 del_lock('domains'.$id);
                 return false;
             }
