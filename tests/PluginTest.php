@@ -97,6 +97,10 @@ class PluginTest extends TestCase
     /**
      * Test that getHooks returns an array with the expected event keys.
      *
+     * Each of these events is a behaviour this plugin is responsible for: the
+     * addon offer, the activation/reactivation paths, the settings page and the
+     * lazy-loading requirements. Losing any key silently unwires that behaviour.
+     *
      * @return void
      */
     public function testGetHooksReturnsExpectedKeys(): void
@@ -106,19 +110,64 @@ class PluginTest extends TestCase
         $this->assertIsArray($hooks);
         $this->assertArrayHasKey('domains.load_addons', $hooks);
         $this->assertArrayHasKey('domains.activate', $hooks);
+        $this->assertArrayHasKey('domains.reactivate', $hooks);
         $this->assertArrayHasKey('domains.settings', $hooks);
         $this->assertArrayHasKey('function.requirements', $hooks);
     }
 
     /**
-     * Test that getHooks returns exactly 4 hooks.
+     * Test that every registered hook is actually dispatchable and module scoped.
+     *
+     * The host copies each getHooks() entry straight into a Symfony
+     * EventDispatcher listener, so an entry is only useful if its event name is
+     * a non-empty string and its handler resolves to a real public static
+     * method. Module scoped event names must also be built from the declared
+     * $module property - a hardcoded or misspelled prefix would register a
+     * listener for an event the domains module never fires.
      *
      * @return void
      */
-    public function testGetHooksReturnsCorrectCount(): void
+    public function testGetHooksAreDispatchableModuleScopedCallables(): void
     {
         $hooks = Plugin::getHooks();
-        $this->assertCount(4, $hooks);
+        // Event namespaces owned by the framework rather than by a module.
+        $frameworkNamespaces = ['function', 'system', 'ui'];
+        $validated = [];
+
+        foreach ($hooks as $eventName => $handler) {
+            $this->assertIsString($eventName, 'Hook event names must be strings');
+            $this->assertNotSame('', trim($eventName), 'Hook event names must not be empty');
+
+            $namespace = mb_strstr($eventName, '.', true);
+            if ($namespace !== false && !in_array($namespace, $frameworkNamespaces, true)) {
+                $this->assertSame(
+                    Plugin::$module,
+                    $namespace,
+                    "Hook '{$eventName}' is module scoped so its prefix must be the declared module '".Plugin::$module."'"
+                );
+            }
+
+            $this->assertIsArray($handler, "Handler for '{$eventName}' must be a [class, method] pair");
+            $this->assertArrayHasKey(0, $handler, "Handler for '{$eventName}' is missing its class");
+            $this->assertArrayHasKey(1, $handler, "Handler for '{$eventName}' is missing its method");
+            $this->assertSame(Plugin::class, $handler[0], "Handler for '{$eventName}' must point at this plugin class");
+            $this->assertTrue(
+                $this->reflection->hasMethod($handler[1]),
+                "Hook '{$eventName}' references method {$handler[1]}() which does not exist on ".Plugin::class
+            );
+
+            $method = $this->reflection->getMethod($handler[1]);
+            $this->assertTrue($method->isPublic(), "Handler {$handler[1]}() for '{$eventName}' must be public");
+            $this->assertTrue($method->isStatic(), "Handler {$handler[1]}() for '{$eventName}' must be static");
+            $this->assertTrue(is_callable($handler), "Handler for '{$eventName}' must be callable as given");
+
+            $validated[] = $eventName;
+        }
+
+        // A service plugin with no hooks is inert, and this also guarantees the
+        // loop above ran for every entry rather than silently skipping some.
+        $this->assertNotEmpty($hooks, 'A service plugin must register at least one hook');
+        $this->assertSame(array_keys($hooks), $validated, 'Every hook returned by getHooks() must be validated');
     }
 
     /**
