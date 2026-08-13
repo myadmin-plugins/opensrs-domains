@@ -1,6 +1,6 @@
 ---
 name: plugin-hook
-description: Adds a new Symfony EventDispatcher hook to src/Plugin.php following the getHooks() pattern: register event name → [Plugin::class, 'methodName'], implement as public static method accepting GenericEvent. Use when user says 'add hook', 'new event handler', 'plugin event', 'register hook', 'listen to event'. Do NOT use for OpenSRS API wrapper methods in OpenSRS.php, CLI bin/ scripts, or test files. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds a new Symfony EventDispatcher hook to src/Plugin.php following the getHooks() pattern: register event name → [Plugin::class, 'methodName'], implement as public static method accepting GenericEvent. Use when user says 'add hook', 'new event handler', 'plugin event', 'register hook', 'listen to event'. Do NOT use for OpenSRS API wrapper methods in OpenSRS.php, CLI bin/ scripts, or test files. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file

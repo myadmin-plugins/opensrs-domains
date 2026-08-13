@@ -1,6 +1,6 @@
 ---
 name: phpunit-test
-description: Creates or extends PHPUnit 9 tests in tests/ following project patterns: ReflectionClass for structure tests, stub functions from tests/bootstrap.php, namespace Detain\MyAdminOpenSRS\Tests. Use when user says 'add test', 'write tests', 'test coverage'. Do NOT use for non-test PHP files. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Creates or extends PHPUnit 9 tests in tests/ following project patterns: ReflectionClass for structure tests, stub functions from tests/bootstrap.php, namespace Detain\MyAdminOpenSRS\Tests. Use when user says 'add test', 'write tests', 'test coverage'. Do NOT use for non-test PHP files. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file
