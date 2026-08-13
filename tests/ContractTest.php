@@ -78,7 +78,7 @@ class ContractTest extends ServicePluginTestCase
         // Prime FIRST, before anything touches the plugin class. A static property
         // initializer may itself reference a bare constant -- $settings holding
         // REPEAT_BILLING_METHOD => PRORATE_BILLING is the common shape -- and that is
-        // evaluated when the class loads, so even reading ::service fatals on an unprimed
+        // evaluated when the class loads, so even reading ::$type fatals on an unprimed
         // class. Priming before the first mention is what keeps this pin readable.
         $this->primeConstants();
 
@@ -108,12 +108,12 @@ class ContractTest extends ServicePluginTestCase
 
         $this->assertSame(
             [
-            'domains.load_addons',
-            'domains.activate',
-            'domains.reactivate',
-            'domains.settings',
-            'function.requirements',
-        ],
+                'domains.load_addons',
+                'domains.activate',
+                'domains.reactivate',
+                'domains.settings',
+                'function.requirements',
+            ],
             array_keys($hooks),
             'the hook table changed shape -- a key was added, removed or renamed'
         );
