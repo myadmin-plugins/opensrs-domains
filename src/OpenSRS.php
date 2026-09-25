@@ -189,6 +189,47 @@ class OpenSRS
     }
 
     /**
+     * Returns a copy of an OpenSRS call array that is safe to log: the value of
+     * every password, cookie, auth_info or api key field is replaced, at any
+     * depth. The call actually sent is not changed.
+     *
+     * @param array $call the call array (func/attributes)
+     * @return array
+     */
+    public static function redactCallArray(array $call)
+    {
+        foreach ($call as $key => $value) {
+            if (is_string($key) && preg_match('/pass|pwd|secret|cookie|auth_?info|api_?key/i', $key) === 1) {
+                if ($value !== '' && $value !== null && $value !== []) {
+                    $call[$key] = '[redacted]';
+                }
+            } elseif (is_array($value)) {
+                $call[$key] = self::redactCallArray($value);
+            }
+        }
+        return $call;
+    }
+
+    /**
+     * JSON form of redactCallArray() for log lines; accepts the call as an
+     * array or as the JSON string that is sent.
+     *
+     * @param string|array $call
+     * @return string
+     */
+    public static function redactCall($call)
+    {
+        if (is_string($call)) {
+            $decoded = json_decode($call, true);
+            if (!is_array($decoded)) {
+                return '[unparsable call redacted]';
+            }
+            $call = $decoded;
+        }
+        return json_encode(self::redactCallArray((array) $call));
+    }
+
+    /**
      * performs the common request code
      *
      * @param string|array $callstring array or string with the request info
@@ -201,6 +242,7 @@ class OpenSRS
         } else {
             $action = $callstring['func'];
         }
+        $logCallstring = self::redactCall((array) $callstring);
         $callstring = json_encode($callstring);
         if (class_exists(\StatisticClient::class, false)) {
             \StatisticClient::tick('OpenSRS', $action);
@@ -211,7 +253,7 @@ class OpenSRS
         } catch (\opensrs\APIException $e) {
             $info = $e->getInfo();
             $info = isset($info['error']) ? trim(implode("\n", array_unique(explode("\n", str_replace([' owner ',' tech ',' admin ',' billing '], [' ',' ',' ',' '], $info['error']))))) : '';
-            myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage().':'.$info, __LINE__, __FILE__);
+            myadmin_log('opensrs', 'error', $logCallstring.':'.$e->getMessage().':'.$info, __LINE__, __FILE__);
             if ($e->getMessage() == 'oSRS Error Code #480: Domain not found.') {
                 if (\MyAdmin\App::ima() == 'admin') {
                     add_output('<div class="container alert alert-danger">'.$e->getMessage().':'.$info.'</div>');
@@ -224,7 +266,7 @@ class OpenSRS
             }
             return false;
         } catch (\opensrs\Exception $e) {
-            myadmin_log('opensrs', 'error', $callstring.':'.$e->getMessage(), __LINE__, __FILE__);
+            myadmin_log('opensrs', 'error', $logCallstring.':'.$e->getMessage(), __LINE__, __FILE__);
             if (class_exists(\StatisticClient::class, false)) {
                 \StatisticClient::report('OpenSRS', $action, false, $e->getCode(), $e->getMessage(), STATISTICS_SERVER);
             }
@@ -413,9 +455,9 @@ class OpenSRS
                 'domain' => $domain
         ]];
         $osrsHandler = self::request($callstring);
-        request_log('domains', false, __FUNCTION__, 'opensrs', 'cookieSet', $callstring, $osrsHandler);
+        request_log('domains', false, __FUNCTION__, 'opensrs', 'cookieSet', self::redactCallArray($callstring), $osrsHandler);
         if (!isset($osrsHandler->resultFullRaw['attributes'])) {
-            myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},{$password},{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
+            myadmin_log('domains', 'info', "Possible Problem with opensrs_Get_cookie({$username},[redacted],{$domain}) - Returned ".json_encode($osrsHandler), __LINE__, __FILE__);
             return false;
         }
         $cookie = $osrsHandler->resultFullRaw['attributes']['cookie'];
@@ -436,7 +478,7 @@ class OpenSRS
                 'name' => 'all'
         ]];
         $osrsHandler = self::request($callstring);
-        request_log('domains', false, __FUNCTION__, 'opensrs', 'nsGet', $callstring, $osrsHandler);
+        request_log('domains', false, __FUNCTION__, 'opensrs', 'nsGet', self::redactCallArray($callstring), $osrsHandler);
         return $osrsHandler->resultFullRaw['nameserver_list'] ?? false;
     }
 
@@ -502,7 +544,7 @@ class OpenSRS
         ]];
         //echo "Call String: $callstring\n<br>";
         $osrsHandler = self::request($callstring);
-        request_log('domains', false, __FUNCTION__, 'opensrs', 'nsDelete', $callstring, $osrsHandler);
+        request_log('domains', false, __FUNCTION__, 'opensrs', 'nsDelete', self::redactCallArray($callstring), $osrsHandler);
         myadmin_log('domains', 'info', 'Delete NS Response'.json_encode($osrsHandler), __LINE__, __FILE__);
         if ($osrsHandler->resultFullRaw['is_success'] == 1) {
             //			echo $osrsHandler->resultFullRaw['response_text'].'<br>';
