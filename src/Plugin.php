@@ -572,10 +572,10 @@ class Plugin
                             }
                             if ($extraInfo['registrant_type'] == 'individual') {
                                 $extraInfo['country_of_birth'] = $extra['country_of_birth'];
-                                $extraInfo['date_of_birth'] = $extra['country_of_birth'];
+                                $extraInfo['date_of_birth'] = $extra['date_of_birth'] ?? '';
                                 if (mb_strtoupper($extraInfo['country_of_birth']) == 'FR') {
-                                    $extraInfo['place_of_birth'] = $extra['country_of_birth'];
-                                    $extraInfo['postal_code_of_birth'] = $extra['country_of_birth'];
+                                    $extraInfo['place_of_birth'] = $extra['place_of_birth'] ?? '';
+                                    $extraInfo['postal_code_of_birth'] = $extra['postal_code_of_birth'] ?? '';
                                 }
                             }
                             $callArray['attributes']['tld_data']['registrant_extra_info'] = $extraInfo;
