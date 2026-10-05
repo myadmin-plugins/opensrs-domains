@@ -68,7 +68,9 @@ class OpenSRS
         }
         $this->serviceExtra = run_event('parse_service_extra', $this->serviceInfo[$this->settings['PREFIX'].'_extra'], $this->module);
         $this->serviceAddons = get_service_addons($this->id, $this->module);
-        $this->cookie = $this->getCookieRaw($this->serviceInfo['domain_username'], $this->serviceInfo['domain_password'], $this->serviceInfo['domain_hostname']);
+        // plaintext comes back unchanged; a SecretBox envelope is opened, and one that will not open skips the login (MyAdmin plan_2way §5.4)
+        $password = self::registrarPassword($this->serviceInfo);
+        $this->cookie = $password === false ? false : $this->getCookieRaw($this->serviceInfo['domain_username'], $password, $this->serviceInfo['domain_hostname']);
         $this->loadDomainInfo();
     }
 
@@ -435,6 +437,33 @@ class OpenSRS
         if (isset($this->osrsHandlerAllInfo->resultFullRaw['attributes'])) {
             $this->registrarStatus = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['sponsoring_rsp'];
             $this->expiryDate = $this->osrsHandlerAllInfo->resultFullRaw['attributes']['expiredate'];
+        }
+    }
+
+    /**
+     * The registrar password of a domains row (domain_id, domain_password), for
+     * an OpenSRS login (MyAdmin plan_2way §5.4). Through core's
+     * ServiceSecrets::readColumn(): plaintext comes back exactly as stored, a
+     * SecretBox envelope is opened. One that will not open is logged (never the
+     * value) and gives false, so the caller skips the login instead of sending it.
+     * A core tree without the class gets the stored value, as before.
+     *
+     * @param array<string,mixed> $row
+     * @return mixed the password, or false when it will not open
+     */
+    public static function registrarPassword(array $row)
+    {
+        $stored = $row['domain_password'] ?? null;
+        if (!class_exists('MyAdmin\\Security\\ServiceSecrets')) {
+            return $stored;
+        }
+        try {
+            return \MyAdmin\Security\ServiceSecrets::readColumn('domains', 'domain_password', $row['domain_id'] ?? '', $stored === null ? null : (string) $stored);
+        } catch (\MyAdmin\Security\SecretBoxException | \InvalidArgumentException $e) {
+            if (function_exists('myadmin_log')) {
+                myadmin_log('domains', 'error', 'secretbox domain_password domain_id '.(int) ($row['domain_id'] ?? 0).' did not open: '.get_class($e), __LINE__, __FILE__);
+            }
+            return false;
         }
     }
 

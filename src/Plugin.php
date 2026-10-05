@@ -174,6 +174,20 @@ class Plugin
     }
 
     /**
+     * The value the domain_password UPDATE writes: sealed for this domain once
+     * core's domain_password write flag is on (MyAdmin plan_2way §5.4), the
+     * plaintext otherwise or on a core tree that predates updateValue().
+     */
+    private static function passwordValue(string $table, string $column, int $id, string $password): string
+    {
+        $ss = 'MyAdmin\\Security\\ServiceSecrets';
+        if (class_exists($ss) && method_exists($ss, 'updateValue')) {
+            return (string) $ss::updateValue($table, $column, $id, $password);
+        }
+        return $password;
+    }
+
+    /**
      * processes a domain activation
      *
      * @param int $id
@@ -206,9 +220,19 @@ class Plugin
                 $username = str_replace(['-', '.'], ['', ''], strtolower($serviceClass->getHostname()));
                 $username = mb_substr($username, 0, 15);
             }
-            $password = $serviceClass->getPassword();
-            if (trim($password) == '' || strlen(trim($password)) < 10) {
+            // opened through core's SecretBox reader: plaintext unchanged, an envelope opened (MyAdmin plan_2way §5.4)
+            $password = \Detain\MyAdminOpenSRS\OpenSRS::registrarPassword(['domain_id' => $serviceClass->getId(), 'domain_password' => $serviceClass->getPassword()]);
+            if ($password === false) {
+                self::$lastError = 'The stored registrar password could not be read; activation skipped.';
+                del_lock('domains'.$id);
+                return false;
+            }
+            if (trim((string) $password) == '' || strlen(trim((string) $password)) < 10) {
                 $password = _randomstring(20);
+                // Q13 (owner): persist the regenerated password, so the stored one matches what OpenSRS is given;
+                // sealed for this domain once core's domain_password write flag is on
+                $db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_password='".$db->real_escape(self::passwordValue($settings['TABLE'], $settings['PREFIX'].'_password', $id, $password))."' where {$settings['PREFIX']}_id={$id}", __LINE__, __FILE__);
+                myadmin_log('opensrs', 'info', "Stored a regenerated registrar password for {$settings['TITLE']} {$id}", __LINE__, __FILE__, self::$module, $id);
             }
             $serviceInfo = $serviceTypes[$serviceClass->getType()];
             $serviceTld = $serviceInfo['services_field1'];
